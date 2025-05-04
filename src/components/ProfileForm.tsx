@@ -5,8 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDropzone } from 'react-dropzone';
 import { FaLock } from "react-icons/fa6";
 import { TbLoader3 } from "react-icons/tb";
+import bcrypt from 'bcryptjs';
 
-export default function ProfileForm() {
+export default function ProfileForm({ handleIsProfileCreated }: { handleIsProfileCreated: (status: boolean) => void }) {
+
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -17,9 +19,12 @@ export default function ProfileForm() {
     profilePhoto: '',
     username: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -41,18 +46,35 @@ export default function ProfileForm() {
     accept: { 'image/*': ['.jpeg', '.png', '.jpg'] as const }, 
     onDrop: handleFileUpload,
   });
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setMessage('');
     
-    const userId = uuidv4();
-    const formDataWithId = { ...formData, userId };
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Form submitted:', formDataWithId);
+    if (formData.password !== formData.confirmPassword) {
+      setMessage('Passwords do not match!');
       setIsSubmitting(false);
-      // Reset form after submission
+      return;
+    }
+
+  
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+  
+      // Success case
+      setIsSuccess(true);
+      setMessage(data.message);
       setFormData({
         name: '',
         age: '',
@@ -63,9 +85,20 @@ export default function ProfileForm() {
         profilePhoto: '',
         username: '',
         password: '',
+        confirmPassword: ''
       });
-    }, 1500);
+      setTimeout(() => {
+        handleIsProfileCreated(true); 
+      }, 3000); 
+  
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setMessage(error.message || 'An error occurred during registration');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
@@ -234,8 +267,24 @@ export default function ProfileForm() {
                 required
               />
             </div>
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                ConfirmPassword
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="••••••••"
+                required
+              />
+            </div>
           </div>
-
+          {isSuccess && <div><p>{message}</p></div>}
           <div>
             <button
               type="submit"
