@@ -1,36 +1,62 @@
 "use client";
 import { FiEdit } from "react-icons/fi";
-import { FaWeight, FaRulerVertical, FaBirthdayCake, FaVenusMars } from "react-icons/fa";
+import { FaWeight, FaRulerVertical, FaVenusMars } from "react-icons/fa";
 import { RiUser3Fill } from "react-icons/ri";
 import { IoMdFitness } from "react-icons/io";
+import { useUser } from "@/context/UserContext";
 
 export default function ProfileInfo() {
-  // Dummy data - this will be replaced with actual data from your form
-  const profileData = {
-    name: "Alex Johnson",
-    age: 28,
-    sex: "Male",
-    weight: "75 kg",
-    height: "178 cm",
-    bmi: "23.7",
-    username: "alexfit",
-    profilePhoto: "", // Leave empty to show placeholder
-    joinDate: "March 15, 2023",
-    fitnessLevel: "Intermediate",
-    goals: ["Build muscle", "Improve endurance"]
+  const { user } = useUser();
+  
+  if (!user) {
+    return <div className="text-red-500">User data not found</div>;
+  }
+
+  const formatBMI = (bmi: number) => {
+    if (typeof bmi !== 'number' || isNaN(bmi)) return "0.0";
+    return bmi.toFixed(1);
   };
 
+  const formattedData = {
+    name: user.name || "Unknown",
+    age: user.age || 0,
+    sex: user.sex || "Not specified",
+    weight: `${user.weight || 0} kg`,
+    height: `${user.height || 0} cm`,
+    bmi: formatBMI(user.bmi),
+    username: user.username || "",
+    profilePhoto: user.profilePhoto || "",
+    joinDate: new Date().toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }),
+    fitnessLevel: getFitnessLevel(user.bmi || 0),
+    isVerified: user.isVerified || false
+  };
+
+  function getFitnessLevel(bmi: number): string {
+    if (bmi < 18.5) return "Underweight";
+    if (bmi >= 18.5 && bmi < 25) return "Normal";
+    if (bmi >= 25 && bmi < 30) return "Overweight";
+    return "Obese";
+  }
+
+
+
+  
+
   return (
-    <div className="min-h-screen  py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-gray-800/50 backdrop-blur-lg rounded-3xl overflow-hidden shadow-2xl">
           {/* Profile Header */}
           <div className="relative h-48 bg-gradient-to-r from-purple-600 to-blue-500">
             <div className="absolute -bottom-16 left-8">
               <div className="relative">
-                {profileData.profilePhoto ? (
+                {formattedData.profilePhoto ? (
                   <img 
-                    src={profileData.profilePhoto} 
+                    src={formattedData.profilePhoto} 
                     alt="Profile" 
                     className="w-32 h-32 rounded-full border-4 border-gray-800 object-cover shadow-xl"
                   />
@@ -50,11 +76,11 @@ export default function ProfileInfo() {
           <div className="pt-20 px-8 pb-8">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-white">{profileData.name}</h1>
-                <p className="text-gray-400">@{profileData.username}</p>
+                <h1 className="text-3xl font-bold text-white">{formattedData.name}</h1>
+                <p className="text-gray-400">@{formattedData.username}</p>
               </div>
               <span className="bg-purple-600/30 text-purple-400 px-3 py-1 rounded-full text-sm font-medium">
-                {profileData.fitnessLevel}
+                {formattedData.fitnessLevel}
               </span>
             </div>
 
@@ -63,22 +89,22 @@ export default function ProfileInfo() {
               <StatCard 
                 icon={<FaWeight className="text-blue-400 text-xl" />} 
                 label="Weight" 
-                value={profileData.weight} 
+                value={formattedData.weight} 
               />
               <StatCard 
                 icon={<FaRulerVertical className="text-green-400 text-xl" />} 
                 label="Height" 
-                value={profileData.height} 
+                value={formattedData.height} 
               />
               <StatCard 
                 icon={<IoMdFitness className="text-yellow-400 text-xl" />} 
                 label="BMI" 
-                value={profileData.bmi} 
+                value={formattedData.bmi} 
               />
               <StatCard 
                 icon={<FaVenusMars className="text-pink-400 text-xl" />} 
                 label="Gender" 
-                value={profileData.sex} 
+                value={formattedData.sex} 
               />
             </div>
 
@@ -94,7 +120,6 @@ export default function ProfileInfo() {
   );
 }
 
-// Reusable Stat Card Component
 function StatCard({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (
     <div className="bg-gray-700/30 hover:bg-gray-700/50 p-4 rounded-xl transition-colors">
@@ -106,18 +131,6 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode, label: string
           <p className="text-gray-400 text-sm">{label}</p>
           <p className="text-white font-semibold">{value}</p>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// Reusable Info Section Component
-function InfoSection({ title, content }: { title: string, content: React.ReactNode | string }) {
-  return (
-    <div>
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      <div className="text-gray-300">
-        {typeof content === 'string' ? <p>{content}</p> : content}
       </div>
     </div>
   );

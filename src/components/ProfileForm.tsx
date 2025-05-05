@@ -1,14 +1,16 @@
 "use client";
-
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useDropzone } from 'react-dropzone';
 import { FaLock } from "react-icons/fa6";
 import { TbLoader3 } from "react-icons/tb";
-import bcrypt from 'bcryptjs';
+import { useUser } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
 
-export default function ProfileForm({ handleIsProfileCreated }: { handleIsProfileCreated: (status: boolean) => void }) {
-
+export default function ProfileForm({ 
+  handleIsProfileCreated 
+}: { 
+  handleIsProfileCreated: (status: boolean) => void 
+}) {
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -22,6 +24,8 @@ export default function ProfileForm({ handleIsProfileCreated }: { handleIsProfil
     confirmPassword: '',
   });
 
+  const { setUser, fetchUserData } = useUser();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [message, setMessage] = useState('');
@@ -58,39 +62,25 @@ export default function ProfileForm({ handleIsProfileCreated }: { handleIsProfil
       return;
     }
 
-  
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
-  
-      // Success case
+
       setIsSuccess(true);
       setMessage(data.message);
-      setFormData({
-        name: '',
-        age: '',
-        sex: '',
-        weight: '',
-        height: '',
-        bmi: '',
-        profilePhoto: '',
-        username: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setTimeout(() => {
-        handleIsProfileCreated(true); 
-      }, 3000); 
-  
+      localStorage.setItem('user', JSON.stringify({ username: data.user.username }));
+      await fetchUserData(data.user.username);
+      handleIsProfileCreated(true);
+      router.push('/profile');
     } catch (error: any) {
       console.error('Registration error:', error);
       setMessage(error.message || 'An error occurred during registration');
@@ -214,7 +204,7 @@ export default function ProfileForm({ handleIsProfileCreated }: { handleIsProfil
                 value={formData.bmi}
                 onChange={handleChange}
                 className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="22.5"
+                placeholder="22"
                 required
               />
             </div>

@@ -55,25 +55,28 @@ export async function POST(request: Request) {
       bmi: Number(data.bmi),
       profilePhoto: data.profilePhoto || '',
       username: data.username,
-      password: hashedPassword
+      password: hashedPassword,
+      isVerified: true
     });
 
-    // Save to database
     await newUser.save();
-    console.log('User created:', newUser); // Debug log
 
-    return NextResponse.json(
-      { 
-        success: true, 
-        message: 'Registration successful',
-        user: {
-          userId: newUser.userId,
-          name: newUser.name,
-          username: newUser.username
-        }
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({
+      success: true, 
+      message: 'Registration successful',
+      user: {
+        userId: newUser.userId,
+        name: newUser.name,
+        age: newUser.age,
+        sex: newUser.sex,
+        weight: newUser.weight,
+        height: newUser.height,
+        bmi: newUser.bmi,
+        profilePhoto: newUser.profilePhoto,
+        username: newUser.username,
+        isVerified: newUser.isVerified
+      }
+    }, { status: 201 });
 
   } catch (error) {
     console.error('Registration error:', error);
