@@ -1,13 +1,13 @@
 "use client"
 import Navbar from "@/components/Navbar";
+import HomeLayout from "@/layouts/HomeLayout";
+
 export default function Home() {
   return (
     <div>
-      <Navbar  />
-      <div className="flex flex-col items-center justify-center min-h-screen py-2">
-        <h1>Welcome to FitSync!</h1>
-        {/* You can add more content here */}
-      </div>
+      <Navbar />
+      <HomeLayout />
     </div>
+    
   );
 }

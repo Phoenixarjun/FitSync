@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import ProfileForm from "@/components/ProfileForm";
 import ProfileInfo from "@/layouts/ProfileInfo";
 import { useUser } from "@/context/UserContext";
+import Loader from "@/components/Loader";
 
 export default function Profile() {
   const { user, loading } = useUser();
@@ -22,7 +23,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="text-white">Loading...</div>
+        <div className="text-white"> <Loader /> </div>
       </div>
     );
   }

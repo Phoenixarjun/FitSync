@@ -1,22 +1,8 @@
 export default function Loader() {
-  return(
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="loader"></div>
-      <style jsx>{`
-        .loader {
-          border: 16px solid #f3f3f3; /* Light grey */
-          border-top: 16px solid #3498db; /* Blue */
-          border-radius: 50%;
-          width: 120px;
-          height: 120px;
-          animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+  return (
+    <div className="flex flex-col items-center justify-center h-screen space-y-4">
+      <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+      <p className="text-lg font-medium text-gray-600 animate-pulse">Loading, kindly wait...</p>
     </div>
-  )
+  );
 }
