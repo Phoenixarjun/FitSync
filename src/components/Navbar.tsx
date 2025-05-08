@@ -22,7 +22,7 @@ export default function Navbar() {
     setIsLoading(true);
     setError("");
     setShouldRegister(false);
-
+  
     try {
       const response = await fetch('/api/verify', {
         method: 'POST',
@@ -31,17 +31,23 @@ export default function Navbar() {
         },
         body: JSON.stringify({ username, password }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         if (data.shouldRegister) {
           setShouldRegister(true);
         }
         throw new Error(data.message || 'Verification failed');
       }
-
-      localStorage.setItem('user', JSON.stringify({ username: data.data.username }));
+  
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify({
+        username: data.data.username,
+        isVerified: true,
+        userId: data.data.userId,
+      }));
+  
       await fetchUserData(data.data.username);
       router.push('/profile');
     } catch (err: any) {
@@ -77,7 +83,7 @@ export default function Navbar() {
             <li>
               <button 
                 onClick={logout}
-                className="hover:text-purple-400 transition-colors"
+                className="text-cyan-400 hover:text-purple-400 transition-colors"
               >
                 Logout
               </button>

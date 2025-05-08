@@ -29,7 +29,6 @@ export async function POST(request: Request) {
         bmi: user.bmi,
         profilePhoto: user.profilePhoto,
         username: user.username,
-        isVerified: user.isVerified || false
       }
     });
 

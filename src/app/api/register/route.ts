@@ -56,7 +56,6 @@ export async function POST(request: Request) {
       profilePhoto: data.profilePhoto || '',
       username: data.username,
       password: hashedPassword,
-      isVerified: true
     });
 
     await newUser.save();

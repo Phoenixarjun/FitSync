@@ -38,11 +38,16 @@ export async function POST(request: Request) {
       { isVerified: true },
       { new: true }
     ).select('-password -__v');
-
+    
+    // Return additional user data that should be stored
     return NextResponse.json({
       success: true,
       message: "Verification successful",
-      data: updatedUser
+      data: {
+        username: updatedUser.username,
+        isVerified: updatedUser.isVerified,
+        userId: updatedUser._id,
+      }
     });
 
   } catch (error) {

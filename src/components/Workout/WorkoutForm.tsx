@@ -5,6 +5,7 @@ import { ChevronDownIcon, ChevronUpIcon, CheckIcon, Cross2Icon, PlusIcon } from 
 import classNames from 'classnames';
 import { useRouter } from "next/navigation";
 import { useUser } from '@/context/UserContext';
+import { estimateCalories } from '@/lib/caloriesEstimator';
 
 type CardioExercise = {
   id: string;
@@ -33,6 +34,11 @@ type AllWorkouts = {
   streak?: number; 
   consistency?: number;
   myBestStreak?: number;
+  calories?: {
+    total: number;
+    cardio: number;
+    weight: number;
+  };
 };
 
 const exerciseCategories = {
@@ -201,11 +207,29 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
       }
       weightByCategory[exercise.category].push(exercise);
     });
-
+  
+    // Calculate calories
+    const { totalCalories, cardioCalories, weightCalories } = estimateCalories({
+      cardio: cardioExercises.map(ex => ({
+        type: ex.type,
+        time: ex.time,
+        speed: ex.speed,
+        distance: ex.distance,
+      })),
+      weight: weightByCategory,
+      userWeightKg: user?.weight || 70,
+    });
+    
+  
     return {
       cardio: [...cardioExercises],
       weight: weightByCategory,
       userId: user?.userId,
+      calories: {
+        total: totalCalories,
+        cardio: cardioCalories,
+        weight: weightCalories,
+      },
       createdAt: new Date(),
     };
   };
@@ -219,7 +243,7 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
       setIsSubmitting(false);
       return;
     }
-  
+    
     try {
       const response = await fetch('/api/saveworkout', {
         method: 'POST',
@@ -233,6 +257,7 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
       });
   
       const data = await response.json();
+      console.log("Workout saved:", data);
   
       if (!response.ok) {
         throw new Error(data.message || 'Failed to save workout');
@@ -259,7 +284,7 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
     : exercisesData[selectedCategory as keyof typeof exercisesData] || [];
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen py-8 px-4 bg-gray-900">
+    <div className="flex flex-col items-center justify-center w-screen min-h-screen py-8 px-4 bg-gray-900">
       <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-lg p-6">
         <h1 className="text-2xl font-bold mb-6 text-center text-white">Workout Tracker</h1>
         

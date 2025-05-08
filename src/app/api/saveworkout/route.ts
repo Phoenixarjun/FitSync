@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     const workout = new Work({
-      ...body,
+      ...body, 
       stats,
       createdAt: currentDate
     });

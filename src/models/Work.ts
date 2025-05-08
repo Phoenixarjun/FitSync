@@ -29,6 +29,11 @@ export interface AllWorkouts extends Document {
   weight: Record<string, WeightExercise[]>;
   userId: string;
   stats: UserStats;
+  calories: {
+    total: number;
+    cardio: number;
+    weight: number;
+  };
   createdAt: Date;
 }
 
@@ -61,6 +66,11 @@ const WorkoutSchema = new Schema<AllWorkouts>({
   weight: { type: Map, of: [WeightExerciseSchema], required: true },
   userId: { type: String, required: true },
   stats: UserStatsSchema,
+  calories: {
+    total: { type: Number, required: true },
+    cardio: { type: Number, required: true },
+    weight: { type: Number, required: true }
+  },
   createdAt: { type: Date, default: Date.now }
 });
 
