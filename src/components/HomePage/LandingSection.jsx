@@ -2,12 +2,7 @@ import Link from "next/link";
 
 export default function LandingSection() {
   return (
-    <div 
-      className="relative flex flex-col items-center justify-center h-screen w-full bg-cover bg-center"
-      style={{ backgroundImage: "url('/gym2.jpg')" }}
-      aria-label="Background gym image"
-    >
-      <div className="absolute inset-0 bg-black opacity-60 z-0 pointer-events-none" />
+    <div className="z-10 flex flex-col items-center justify-center">
       <div className="z-10 flex items-center justify-center">
         <video
           className="w-64 h-64 object-cover rounded-full border-4 border-white animate-spin-slow shadow-lg"
@@ -28,7 +23,7 @@ export default function LandingSection() {
       </div>
 
       <p className="z-10 mt-6 text-white text-center text-lg px-6">
-        Add your workout details in the <span className="font-bold text-yellow-400">Workout</span> section to keep track of your progress.
+        Add your workout details in the <span className="font-bold text-[#ff914d]">Workout</span> section to keep track of your progress.
       </p>
 
       <Link href="/workout" className="z-10">

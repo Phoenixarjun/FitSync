@@ -34,7 +34,7 @@ export default function Sidebar() {
   }[fitnessLevel];
 
   return (
-    <div className="flex flex-col min-h-screen w-96 bg-gray-800/50 backdrop-blur-lg shadow-2xl shadow-white/20 p-6">
+    <div className="flex flex-col  min-h-screen w-96 bg-gray-800/50 backdrop-blur-lg shadow-2xl shadow-white/20 p-6">
       {/* User Profile Section */}
       <div className="flex flex-col items-center mb-8">
 

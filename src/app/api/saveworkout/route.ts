@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       stats: {
         streak: stats.currentStreak,
         best: stats.bestStreak,
-        score: stats.consistencyScore
+        score: stats.consistencyScore,
       }
     }, { status: 201 });
   } catch (error) {
@@ -106,23 +106,41 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get the user's most recent workout stats
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+    const todayWorkout = await Work.findOne({
+      userId,
+      createdAt: { $gte: today, $lt: tomorrow },
+    });
+
     const lastWorkout = await Work.findOne({ userId })
       .sort({ createdAt: -1 })
       .exec();
 
-    if (!lastWorkout) {
+    const streak = lastWorkout?.stats?.currentStreak || 0;
+    const best = lastWorkout?.stats?.bestStreak || 0;
+    const score = lastWorkout?.stats?.consistencyScore || 0;
+
+    if (!todayWorkout) {
       return NextResponse.json({
-        streak: 0,
-        best: 0,
-        score: 0
+        streak,
+        best,
+        score,
+        totalCalories: 0,
+        CardioCalories: 0,
+        StrengthCalories: 0,
       });
     }
 
     return NextResponse.json({
-      streak: lastWorkout.stats.currentStreak,
-      best: lastWorkout.stats.bestStreak,
-      score: lastWorkout.stats.consistencyScore
+      streak,
+      best,
+      score,
+      totalCalories: todayWorkout.calories?.total || 0,
+      CardioCalories: todayWorkout.calories?.cardio || 0,
+      StrengthCalories: todayWorkout.calories?.weight || 0,
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
