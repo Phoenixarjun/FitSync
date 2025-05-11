@@ -19,19 +19,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([], { status: 200 });
     }
 
-    const workoutData = workouts.map((w) => {
-      const date = new Date(w.createdAt).toISOString().split('T')[0];
-
-      const cardio = w.calories?.cardio || 0;
-      const weight = w.calories?.weight || 0;
-      const total = cardio + weight;
+    // Transform the data to match what your frontend expects
+    const workoutData = workouts.map((workout) => {
+      // Calculate date in YYYY-MM-DD format
+      const date = new Date(workout.createdAt).toISOString().split('T')[0];
+      
+      // Get calories data (fallback to 0 if not present)
+      const cardioCalories = workout.calories?.cardio || 0;
+      const weightCalories = workout.calories?.weight || 0;
+      const totalCalories = workout.calories?.total || (cardioCalories + weightCalories);
 
       return {
         date,
-        totalCalories: total,
-        cardioCalories: cardio,
-        weightCalories: weight,
-        consistencyScore: w.stats?.consistencyScore || 0
+        totalCalories,
+        cardioCalories,
+        weightCalories,
+        consistencyScore: workout.stats?.consistencyScore || 0,
+        // Add any other fields you want to display
+        streak: workout.stats?.currentStreak || 0,
+        workoutTypes: [
+          ...(workout.cardio?.map((c: { type: string }) => c.type) || []),
+          ...Object.values(workout.weight || {}).flatMap(exercises => 
+            Array.isArray(exercises) ? exercises.map(ex => ex.category) : []
+          )
+        ].filter(Boolean)
       };
     });
 

@@ -1,35 +1,64 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { useUser } from '@/context/UserContext';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-const attendanceDates = [
-  new Date(2023, 5, 15),
-  new Date(2023, 5, 18),
-  new Date(2023, 5, 20),
-  new Date(2023, 5, 22),
-  new Date(2023, 5, 25),
-];
-
 export default function WorkoutCalendar() {
   const [value, onChange] = useState<Value>(new Date());
+  const [workoutDates, setWorkoutDates] = useState<Date[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useUser();
+  const userId = user?.userId;
 
-  const hasWorkout = (date: Date) =>
-    attendanceDates.some(
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchWorkoutDates = async () => {
+      try {
+        const response = await fetch(`/api/workoutProgressInfo?userId=${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch workout data');
+        const data = await response.json();
+
+        const dates = data.map((workout: any) => new Date(workout.date));
+        setWorkoutDates(dates);
+      } catch (error) {
+        console.error('Error fetching workout dates:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkoutDates();
+  }, [userId]);
+
+  const hasWorkout = (date: Date) => {
+    return workoutDates.some(
       (d) =>
         d.getDate() === date.getDate() &&
         d.getMonth() === date.getMonth() &&
         d.getFullYear() === date.getFullYear()
     );
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
 
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
-    if (view === 'month' && hasWorkout(date)) {
+    if (view === 'month' && hasWorkout(date) && !isToday(date)) {
       return (
         <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
-          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+          <div className="h-1 w-1 rounded-full bg-green-500"></div>
         </div>
       );
     }
@@ -37,20 +66,36 @@ export default function WorkoutCalendar() {
   };
 
   const tileClassName = ({ date, view }: { date: Date; view: string }) => {
-    const now = new Date();
     const classes = [];
+    const now = new Date();
 
     if (view === 'month') {
+      // Style for previous/next month dates
       if (date.getMonth() !== now.getMonth()) {
         classes.push('prev-month');
       }
+      
+      // Style for weekends
       if (date.getDay() === 0 || date.getDay() === 6) {
         classes.push('weekend');
+      }
+      
+      // Style for workout days
+      if (hasWorkout(date)) {
+        if (isToday(date)) {
+          classes.push('today-workout');
+        } else {
+          classes.push('past-workout');
+        }
       }
     }
 
     return classes.join(' ');
   };
+
+  if (loading) {
+    return <div className="text-white">Loading calendar...</div>;
+  }
 
   return (
     <>
@@ -82,13 +127,25 @@ export default function WorkoutCalendar() {
           position: relative;
         }
 
+        /* Today's date style */
         .react-calendar__tile--now {
-          background: rgba(147, 197, 253, 0.2); /* Light Blue */
+          background: transparent;
+          color: white;
+        }
+
+        /* Today with workout */
+        .react-calendar__tile.today-workout {
+          background: rgba(59, 130, 246, 0.4);
           border-radius: 50%;
         }
 
+        /* Past workout days */
+        .react-calendar__tile.past-workout {
+          color: #4ade80; /* Green for workout days */
+        }
+
         .react-calendar__tile--active {
-          background: rgba(59, 130, 246, 0.4); /* Darker Blue */
+          background: rgba(59, 130, 246, 0.4);
           color: white;
           border-radius: 50%;
         }
@@ -107,11 +164,11 @@ export default function WorkoutCalendar() {
         }
 
         .react-calendar__tile.weekend {
-          color: #f87171; 
+          color: #f87171;
         }
 
         .react-calendar__tile.prev-month {
-          color: #9ca3af; 
+          color: #9ca3af;
         }
       `}</style>
     </>

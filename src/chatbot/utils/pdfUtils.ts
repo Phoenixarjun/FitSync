@@ -1,16 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import pdfParse from 'pdf-parse';  // Default import
+const pdfParse = require('pdf-parse'); 
 
 /**
  * Function to extract text from a PDF file
  * @param filePath - The file path of the PDF
- * @returns {Promise<string>} - The text extracted from the PDF
+ * @returns {Promise<string>}
  */
 export const extractTextFromPDF = async (filePath: string): Promise<string> => {
   try {
     const dataBuffer = fs.readFileSync(filePath);
-    const data = await pdfParse(dataBuffer); // Use pdf-parse as a function
+    const data = await pdfParse(dataBuffer); 
     return data.text;
   } catch (error) {
     console.error('Error reading PDF:', error);
@@ -51,7 +51,7 @@ export const loadAllPDFs = async (folderPath: string): Promise<string[]> => {
       })
     );
 
-    return pdfTexts.filter(text => text.trim().length > 0); // Filter out empty texts
+    return pdfTexts.filter(text => text.trim().length > 0); 
   } catch (error) {
     console.error('Error loading PDFs:', error);
     throw new Error(`Failed to load PDFs: ${error instanceof Error ? error.message : String(error)}`);

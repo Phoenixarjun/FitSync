@@ -1,8 +1,11 @@
+// homepageLayout.tsx
 import React, {useState, useEffect} from 'react'
 import Sidebar from '@/components/Sidebar/Sidebar'
 import LandingSection from '@/components/HomePage/LandingSection'
 import Banner from '@/components/HomePage/Banner'
 import CaloriesBurned from '@/components/HomePage/CaloriesBurned'
+import WorkoutProgress from '@/components/HomePage/WorkoutProgress'
+import ChatBot from '@/components/ChatBot' 
 
 export default function HomeLayout() {
   const [isVerified, setIsVerified] = useState(false);
@@ -35,10 +38,8 @@ export default function HomeLayout() {
     };
   }, []);
 
-
   return (
-    <div className='flex h-full'>   
-      <Sidebar />
+    <div className='flex h-full relative'>   
       <div  className="flex flex-col items-center justify-center gap-20 min-h-screen w-full bg-cover relative"
       style={{ backgroundImage: "url('/gym2.jpg')" }}
       aria-label="Background gym image">
@@ -46,10 +47,14 @@ export default function HomeLayout() {
         <Banner />
         <LandingSection />
         {isVerified && (
-          <CaloriesBurned />
+          <div className='z-10 flex flex-col items-center justify-center gap-20'>
+            <CaloriesBurned />
+            <WorkoutProgress />
+          </div>
         )}
       </div>
-      
+      <Sidebar />
+      <ChatBot /> 
     </div>
   )
 }

@@ -1,6 +1,6 @@
 type CardioEntry = {
   type: string;
-  time: number; // in minutes
+  time: number; 
   speed: number;
   distance: number;
 };

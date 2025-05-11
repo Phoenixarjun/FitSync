@@ -39,11 +39,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadAllPDFs = exports.extractTextFromPDF = void 0;
 var fs = require("fs");
 var path = require("path");
-var pdf_parse_1 = require("pdf-parse"); // Default import
+var pdfParse = require('pdf-parse');
 /**
  * Function to extract text from a PDF file
  * @param filePath - The file path of the PDF
- * @returns {Promise<string>} - The text extracted from the PDF
+ * @returns {Promise<string>}
  */
 var extractTextFromPDF = function (filePath) { return __awaiter(void 0, void 0, void 0, function () {
     var dataBuffer, data, error_1;
@@ -52,7 +52,7 @@ var extractTextFromPDF = function (filePath) { return __awaiter(void 0, void 0, 
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 dataBuffer = fs.readFileSync(filePath);
-                return [4 /*yield*/, (0, pdf_parse_1.default)(dataBuffer)];
+                return [4 /*yield*/, pdfParse(dataBuffer)];
             case 1:
                 data = _a.sent();
                 return [2 /*return*/, data.text];
@@ -103,7 +103,7 @@ var loadAllPDFs = function (folderPath) { return __awaiter(void 0, void 0, void 
                     }); }))];
             case 1:
                 pdfTexts = _a.sent();
-                return [2 /*return*/, pdfTexts.filter(function (text) { return text.trim().length > 0; })]; // Filter out empty texts
+                return [2 /*return*/, pdfTexts.filter(function (text) { return text.trim().length > 0; })];
             case 2:
                 error_2 = _a.sent();
                 console.error('Error loading PDFs:', error_2);
