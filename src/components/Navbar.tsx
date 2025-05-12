@@ -77,6 +77,9 @@ export default function Navbar() {
             <Link href="/workout" className="hover:text-purple-400 transition-colors">Workout</Link>
           </li>
           <li>
+            <Link href="/diet" className="hover:text-purple-400 transition-colors">Diet</Link>
+          </li>
+          <li>
             <Link href="/profile" className="hover:text-purple-400 transition-colors">Profile</Link>
           </li>
           {user ? (

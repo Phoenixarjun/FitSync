@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import WorkoutForm from '@/components/Workout/WorkoutForm';
 import NotVerified from '@/components/NotVerified';
+import ChatBot from '@/components/ChatBot';
 
 export default function HomeLayout() {
   const [isVerified, setIsVerified] = useState(false);
@@ -37,7 +38,6 @@ export default function HomeLayout() {
 
   return (
     <div className='flex items-center'>
-      <Sidebar />
       {
         isVerified ? (
           <WorkoutForm setIsWorkoutDone={setIsWorkoutDone} />
@@ -45,6 +45,8 @@ export default function HomeLayout() {
           <NotVerified />
         )
       }
+      <Sidebar />
+      <ChatBot /> 
     </div>
   );
 }
