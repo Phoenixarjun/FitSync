@@ -35,7 +35,7 @@ export default function DietLayout() {
   }, []);
 
   return (
-    <div className='flex items-center'>
+    <div className='flex h-full'>
       {
         isVerified && (
           <DietChart />

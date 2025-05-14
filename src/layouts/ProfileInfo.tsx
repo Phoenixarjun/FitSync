@@ -7,6 +7,7 @@ import { useUser } from "@/context/UserContext";
 
 export default function ProfileInfo() {
   const { user } = useUser();
+  console.log("User data:", user);
   
   if (!user) {
     return <div className="text-red-500">User data not found</div>;
