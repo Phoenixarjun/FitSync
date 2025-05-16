@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 
 // Define the types for the user data and context
 export type UserData = {
@@ -31,42 +31,39 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to fetch user data from API
-  const fetchUserData = async (username: string) => {
+  const logout = useCallback(() => {
+    localStorage.removeItem("user");
+    setUser(null);
+  }, []);
+
+  const fetchUserData = useCallback(async (username: string) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/userInfo', {
-        method: 'POST',
+      const response = await fetch("/api/userInfo", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ username }),
       });
-  
+
       const data = await response.json();
-  
+
       if (data.success && data.user) {
         setUser(data.user);
       } else {
-        throw new Error('User data not found or invalid.');
+        throw new Error("User data not found or invalid.");
       }
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
+      console.error("Failed to fetch user data:", error);
       logout();
     } finally {
       setLoading(false);
     }
-  };
+  }, [logout]);
 
-  // Function to logout and clear local storage
-  const logout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-  };
-
-  // Use effect to check for stored user data when the component mounts
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const { username } = JSON.parse(storedUser);
@@ -75,11 +72,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
       } catch (e) {
-        console.error('Error parsing stored user data:', e);
+        console.error("Error parsing stored user data:", e);
       }
     }
     setLoading(false);
-  }, []);
+  }, [fetchUserData]);
 
   return (
     <UserContext.Provider value={{ user, setUser, fetchUserData, loading, logout }}>

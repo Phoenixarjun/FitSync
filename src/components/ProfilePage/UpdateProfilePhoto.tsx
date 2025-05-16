@@ -4,6 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { useUser } from "@/context/UserContext";
 import { TbLoader3 } from "react-icons/tb";
 import { FiArrowLeft, FiUpload } from "react-icons/fi";
+import Image from "next/image";
 
 export default function UpdateProfilePhoto({ onCancel }: { onCancel: () => void }) {
   const { user, setUser } = useUser();
@@ -79,7 +80,6 @@ export default function UpdateProfilePhoto({ onCancel }: { onCancel: () => void 
           <div className="w-8"></div>
         </div>
 
-        {/* Display Username */}
         <div className="text-white text-center text-lg font-medium">
         <span className="text-purple-400">{user?.username}</span>
         </div>
@@ -92,11 +92,15 @@ export default function UpdateProfilePhoto({ onCancel }: { onCancel: () => void 
             <input {...getInputProps()} />
             {preview ? (
               <div className="flex flex-col items-center">
-                <img 
-                  src={preview} 
-                  alt="Preview" 
-                  className="w-32 h-32 rounded-full object-cover mb-4"
-                />
+              <Image
+                src={preview}
+                alt="Preview"
+                width={128}
+                height={128}
+                className="w-32 h-32 rounded-full object-cover mb-4"
+                unoptimized
+              />
+
                 <p className="text-gray-400">Click or drag to replace photo</p>
               </div>
             ) : (

@@ -1,13 +1,11 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useUser } from "@/context/UserContext";
-import { useRouter } from "next/navigation";
 import { TbLoader3 } from "react-icons/tb";
 import { FiArrowLeft } from "react-icons/fi";
 
 export default function UpdateProfileForm({ onCancel }: { onCancel: () => void }) {
   const { user, setUser } = useUser();
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -61,20 +59,32 @@ export default function UpdateProfileForm({ onCancel }: { onCancel: () => void }
         }),
       });
 
-      const data = await response.json();
+      const data: unknown = await response.json();
 
-      if (!response.ok) throw new Error(data.message || 'Update failed');
+      // Type guard to validate expected response
+      if (
+        !response.ok ||
+        typeof data !== 'object' ||
+        data === null ||
+        !('user' in data)
+      ) {
+        throw new Error((data as { message?: string })?.message || 'Update failed');
+      }
 
       setIsSuccess(true);
       setMessage('Profile updated successfully!');
-      setUser(data.user);
+      setUser((data as { user: typeof user }).user);
 
       setTimeout(() => {
         onCancel();
       }, 2000);
-    } catch (error: any) {
-      console.error('Update error:', error);
-      setMessage(error.message || 'An error occurred during update');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Update error:', error);
+        setMessage(error.message || 'An error occurred during update');
+      } else {
+        setMessage('Unknown error occurred');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -93,33 +103,23 @@ export default function UpdateProfileForm({ onCancel }: { onCancel: () => void }
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
-            {/* Username */}
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">Username</label>
-              <input
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
+            {[
+              { id: 'username', label: 'Username' },
+              { id: 'name', label: 'Full Name' },
+            ].map(({ id, label }) => (
+              <div key={id}>
+                <label htmlFor={id} className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+                <input
+                  id={id}
+                  name={id}
+                  value={formData[id as keyof typeof formData]}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  required
+                />
+              </div>
+            ))}
 
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
-              <input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-
-            {/* Age and Sex */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="age" className="block text-sm font-medium text-gray-300 mb-1">Age</label>
@@ -150,7 +150,6 @@ export default function UpdateProfileForm({ onCancel }: { onCancel: () => void }
               </div>
             </div>
 
-            {/* Weight and Height */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="weight" className="block text-sm font-medium text-gray-300 mb-1">Weight (kg)</label>
@@ -178,7 +177,6 @@ export default function UpdateProfileForm({ onCancel }: { onCancel: () => void }
               </div>
             </div>
 
-            {/* BMI */}
             <div>
               <label htmlFor="bmi" className="block text-sm font-medium text-gray-300 mb-1">BMI</label>
               <input

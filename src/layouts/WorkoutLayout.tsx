@@ -6,7 +6,6 @@ import ChatBot from '@/components/ChatBot';
 
 export default function HomeLayout() {
   const [isVerified, setIsVerified] = useState(false);
-  const [isWorkoutDone, setIsWorkoutDone] = useState(false);
 
   const checkVerification = () => {
     const storedUser = localStorage.getItem('user');
@@ -40,7 +39,7 @@ export default function HomeLayout() {
     <div className='flex items-center'>
       {
         isVerified ? (
-          <WorkoutForm setIsWorkoutDone={setIsWorkoutDone} />
+          <WorkoutForm />
         ) : (
           <NotVerified />
         )

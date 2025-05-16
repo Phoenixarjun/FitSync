@@ -6,15 +6,22 @@ if (!MONGODB_URI) {
   throw new Error('Please define MONGODB_URI environment variable');
 }
 
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
 declare global {
-  var mongoose: any;
+  var mongoose: MongooseCache | undefined;
 }
 
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Initialize cached if not present
+if (!global.mongoose) {
+  global.mongoose = { conn: null, promise: null };
 }
+
+// Now cached is definitely defined
+const cached = global.mongoose;
 
 async function connectDB() {
   if (cached.conn) {
@@ -26,9 +33,7 @@ async function connectDB() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => mongoose);
   }
 
   try {

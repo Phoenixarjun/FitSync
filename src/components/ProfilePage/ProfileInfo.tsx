@@ -7,6 +7,7 @@ import { useUser } from "@/context/UserContext";
 import { useState } from "react";
 import UpdateProfileForm from "./UpdateProfileForm";
 import UpdateProfilePhoto from "./UpdateProfilePhoto";
+import Image from "next/image";
 
 export default function ProfileInfo() {
   const { user } = useUser();
@@ -64,12 +65,15 @@ export default function ProfileInfo() {
             <div className="absolute -bottom-16 left-8">
               <div className="relative">
                 {formattedData.profilePhoto ? (
-                  <img 
-                    src={formattedData.profilePhoto} 
-                    alt="Profile" 
-                    className="w-32 h-32 rounded-full border-4 border-gray-800 object-cover shadow-xl"
+                  <Image
+                    src={formattedData.profilePhoto}
+                    alt="Profile"
+                    width={128}
+                    height={128}
+                    className="rounded-full border-4 border-gray-800 object-cover shadow-xl"
+                    priority 
                   />
-                ) : (
+                )  : (
                   <div className="w-32 h-32 rounded-full border-4 border-gray-800 bg-gray-700 flex items-center justify-center shadow-xl">
                     <RiUser3Fill className="text-gray-400 text-5xl" />
                   </div>

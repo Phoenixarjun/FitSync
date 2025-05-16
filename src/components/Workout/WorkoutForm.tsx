@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect, forwardRef } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon, Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
@@ -39,6 +40,12 @@ type AllWorkouts = {
     cardio: number;
     weight: number;
   };
+};
+
+type SelectItemProps = {
+  children: React.ReactNode;
+  className?: string;
+  value: string;
 };
 
 const exerciseCategories = {
@@ -128,7 +135,7 @@ const exercisesData = {
   ]
 };
 
-export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (status: boolean) => void }) {
+export default function WorkoutForm() {
   const [tab, setTab] = useState<'cardio' | 'weight'>('cardio');
   const [cardioExercises, setCardioExercises] = useState<CardioExercise[]>([]);
   const [weightExercises, setWeightExercises] = useState<WeightExercise[]>([]);
@@ -220,7 +227,6 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
       userWeightKg: user?.weight || 70,
     });
     
-  
     return {
       cardio: [...cardioExercises],
       weight: weightByCategory,
@@ -264,7 +270,6 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
       }
   
       setMessage("Workout saved successfully!");
-      setIsWorkoutDone(true);
       
       setCardioExercises([]);
       setWeightExercises([]);
@@ -272,16 +277,41 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
       setTimeout(() => {
         router.push('/');
       }, 3000);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving workout:", error);
-      setMessage(error.message || "An error occurred while saving the workout.");
+      setMessage(error instanceof Error ? error.message : "An error occurred while saving the workout.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
   const filteredExercises = selectedCategory === 'all' 
     ? Object.values(exercisesData).flat()
     : exercisesData[selectedCategory as keyof typeof exercisesData] || [];
+
+  const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
+    ({ children, className, value, ...props }, forwardedRef) => {
+      return (
+        <Select.Item
+          value={value}
+          className={classNames(
+            "relative flex items-center pl-6 pr-4 py-2 rounded text-sm leading-none select-none",
+            "data-[highlighted]:bg-teal-800 data-[highlighted]:text-white outline-none",
+            "data-[highlighted]:outline-none text-gray-300",
+            className
+          )}
+          {...props}
+          ref={forwardedRef}
+        >
+          <Select.ItemText>{children}</Select.ItemText>
+          <Select.ItemIndicator className="absolute left-1 inline-flex items-center justify-center w-4">
+            <CheckIcon className="text-teal-400" />
+          </Select.ItemIndicator>
+        </Select.Item>
+      );
+    }
+  );
+  SelectItem.displayName = 'SelectItem';
 
   return (
     <div className="flex flex-col items-center justify-center w-screen min-h-screen py-8 px-4 bg-gray-900">
@@ -335,11 +365,11 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
                 Cardio Type
               </label>
               <div className="grid grid-cols-3 gap-2 mb-4">
-                {['treadmill', 'uprightBike', 'crossTrainer'].map((type) => (
+                {(['treadmill', 'uprightBike', 'crossTrainer'] as const).map((type) => (
                   <button
                     key={type}
                     type="button"
-                    onClick={() => setCardioType(type as any)}
+                    onClick={() => setCardioType(type)}
                     className={classNames(
                       "py-2 px-3 rounded-md text-sm font-medium transition-all",
                       cardioType === type 
@@ -617,46 +647,23 @@ export default function WorkoutForm({ setIsWorkoutDone }: { setIsWorkoutDone: (s
               </div>
             )}
           </Tabs.Content>
-          </Tabs.Root>
+        </Tabs.Root>
 
-{message && (
-  <div className={`mb-4 p-3 rounded-md ${message.includes("success") ? "bg-green-800 text-green-200" : "bg-red-800 text-red-200"}`}>
-    {message}
-  </div>
-)}
+        {message && (
+          <div className={`mb-4 p-3 rounded-md ${message.includes("success") ? "bg-green-800 text-green-200" : "bg-red-800 text-red-200"}`}>
+            {message}
+          </div>
+        )}
 
-<button
-  type="button"
-  onClick={handleSubmit}
-  disabled={(cardioExercises.length === 0 && weightExercises.length === 0) || isSubmitting}
-  className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
->
-  {isSubmitting ? "Saving..." : "Save Complete Workout"}
-</button>
-</div>
-</div>
-);
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={(cardioExercises.length === 0 && weightExercises.length === 0) || isSubmitting}
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? "Saving..." : "Save Complete Workout"}
+        </button>
+      </div>
+    </div>
+  );
 }
-
-const SelectItem = React.forwardRef<HTMLDivElement, any>(
-({ children, className, ...props }, forwardedRef) => {
-return (
-<Select.Item
-value={props.value}
-className={classNames(
-  "relative flex items-center pl-6 pr-4 py-2 rounded text-sm leading-none select-none",
-  "data-[highlighted]:bg-teal-800 data-[highlighted]:text-white outline-none",
-  "data-[highlighted]:outline-none text-gray-300",
-  className
-)}
-{...props}
-ref={forwardedRef}
->
-<Select.ItemText>{children}</Select.ItemText>
-<Select.ItemIndicator className="absolute left-1 inline-flex items-center justify-center w-4">
-  <CheckIcon className="text-teal-400" />
-</Select.ItemIndicator>
-</Select.Item>
-);
-}
-);

@@ -16,12 +16,20 @@ import {
 import Loader from '../Loader';
 import { useUser } from '@/context/UserContext';
 
+interface WorkoutEntry {
+  date: string;
+  totalCalories: number;
+  cardioCalories: number;
+  weightCalories: number;
+  consistencyScore: number;
+  workoutTypes?: string[];
+}
 
 export default function WorkoutProgress() {
   const { user } = useUser();
-  console.log('User:', user?.userId);
   const userId = user?.userId;
-  const [workoutData, setWorkoutData] = useState<any[]>([]);
+
+  const [workoutData, setWorkoutData] = useState<WorkoutEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,9 +37,9 @@ export default function WorkoutProgress() {
 
     const fetchWorkoutProgress = async () => {
       try {
-        const response = await fetch(`/api/workoutProgressInfo?userId=${userId}`);  
+        const response = await fetch(`/api/workoutProgressInfo?userId=${userId}`);
         if (!response.ok) throw new Error('Failed to fetch workout data');
-        const data = await response.json();
+        const data: WorkoutEntry[] = await response.json();
         setWorkoutData(data);
       } catch (error) {
         console.error('Error fetching workout progress:', error);
@@ -39,6 +47,7 @@ export default function WorkoutProgress() {
         setLoading(false);
       }
     };
+
     fetchWorkoutProgress();
   }, [userId]);
 
@@ -64,93 +73,90 @@ export default function WorkoutProgress() {
       <h1 className="text-3xl font-bold text-center mb-8">Your Workout Progress🔥</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Total Calories Burned */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-white/20">
-          <h3 className="text-xl font-semibold mb-4 text-center">Total Calories Burned Over Time</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={workoutData}>
-                <CartesianGrid stroke="#444" />
-                <XAxis dataKey="date" stroke="#ccc" />
-                <YAxis stroke="#ccc" />
-                <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="totalCalories"
-                  stroke="#00d8ff"
-                  strokeWidth={2}
-                  activeDot={{ r: 6 }}
-                  name="Total Calories"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        {/* Line Chart */}
+        <ChartCard title="Total Calories Burned Over Time">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={workoutData}>
+              <CartesianGrid stroke="#444" />
+              <XAxis dataKey="date" stroke="#ccc" />
+              <YAxis stroke="#ccc" />
+              <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="totalCalories"
+                stroke="#00d8ff"
+                strokeWidth={2}
+                activeDot={{ r: 6 }}
+                name="Total Calories"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
-        {/* Cardio vs Weight Calories */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-white/20">
-          <h3 className="text-xl font-semibold mb-4 text-center">Cardio vs Weight Training</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={workoutData}>
-                <CartesianGrid stroke="#444" />
-                <XAxis dataKey="date" stroke="#ccc" />
-                <YAxis stroke="#ccc" />
-                <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
-                <Legend />
-                <Bar dataKey="cardioCalories" fill="#34d399" name="Cardio" />
-                <Bar dataKey="weightCalories" fill="#818cf8" name="Weight" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        {/* Bar Chart */}
+        <ChartCard title="Cardio vs Weight Training">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={workoutData}>
+              <CartesianGrid stroke="#444" />
+              <XAxis dataKey="date" stroke="#ccc" />
+              <YAxis stroke="#ccc" />
+              <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
+              <Legend />
+              <Bar dataKey="cardioCalories" fill="#34d399" name="Cardio" />
+              <Bar dataKey="weightCalories" fill="#818cf8" name="Weight" />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
-        {/* Consistency Score */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-white/20">
-          <h3 className="text-xl font-semibold mb-4 text-center">Workout Consistency</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={workoutData}>
-                <CartesianGrid stroke="#444" />
-                <XAxis dataKey="date" stroke="#ccc" />
-                <YAxis stroke="#ccc" />
-                <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="consistencyScore"
-                  stroke="#facc15"
-                  fill="#facc15"
-                  name="Consistency"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        {/* Area Chart */}
+        <ChartCard title="Workout Consistency">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={workoutData}>
+              <CartesianGrid stroke="#444" />
+              <XAxis dataKey="date" stroke="#ccc" />
+              <YAxis stroke="#ccc" />
+              <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
+              <Legend />
+              <Area
+                type="monotone"
+                dataKey="consistencyScore"
+                stroke="#facc15"
+                fill="#facc15"
+                name="Consistency"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
         {/* Workout Types */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-white/20">
-          <h3 className="text-xl font-semibold mb-4 text-center">Workout Types</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={workoutData.map(item => ({
-                  date: item.date,
-                  count: item.workoutTypes?.length || 0
-                }))}
-              >
-                <CartesianGrid stroke="#444" />
-                <XAxis dataKey="date" stroke="#ccc" />
-                <YAxis stroke="#ccc" />
-                <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
-                <Legend />
-                <Bar dataKey="count" fill="#fb7185" name="Workout Types" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <ChartCard title="Workout Types">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={workoutData.map(item => ({
+                date: item.date,
+                count: item.workoutTypes?.length || 0
+              }))}
+            >
+              <CartesianGrid stroke="#444" />
+              <XAxis dataKey="date" stroke="#ccc" />
+              <YAxis stroke="#ccc" />
+              <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
+              <Legend />
+              <Bar dataKey="count" fill="#fb7185" name="Workout Types" />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
       </div>
+    </div>
+  );
+}
+
+function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 shadow-lg border border-white/20">
+      <h3 className="text-xl font-semibold mb-4 text-center">{title}</h3>
+      <div className="h-80">{children}</div>
     </div>
   );
 }

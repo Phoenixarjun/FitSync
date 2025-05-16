@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PineconeStore } from "@langchain/pinecone";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
@@ -45,7 +45,7 @@ async function generateDietPlan(body: RequestBody) {
   else weightCategory = 'obese';
 
   const dietPrompt = `Create a personalized 7-day diet plan with these details:
-  
+
 USER PROFILE:
 - Name: ${userData.name}
 - Age: ${userData.age}
@@ -102,16 +102,15 @@ Return ONLY a valid JSON array with 7 days of meal plans. Example:
       const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
         pineconeIndex: index,
         textKey: PINECONE_TEXT_KEY,
-        namespace: "default", // Changed namespace to match your data
+        namespace: "default",
       });
 
-      const retriever = vectorStore.asRetriever({ k: 5 }); // Increased to 5 for better retrieval
+      const retriever = vectorStore.asRetriever({ k: 5 });
 
       const qaPrompt = ChatPromptTemplate.fromMessages([
         [
-          "system", 
-          "You are a certified nutritionist. Use the retrieved diet plans as reference, " +
-          "but create a NEW personalized plan. Return ONLY valid JSON."
+          "system",
+          "You are a certified nutritionist. Use the retrieved diet plans as reference, but create a NEW personalized plan. Return ONLY valid JSON."
         ],
         ["human", dietPrompt]
       ]);
@@ -127,18 +126,17 @@ Return ONLY a valid JSON array with 7 days of meal plans. Example:
       });
 
       const result = await chain.invoke({ input: dietPrompt });
-      
-      // Improved response parsing
+
       let parsedResult;
       try {
-        parsedResult = typeof result.answer === 'string' 
+        parsedResult = typeof result.answer === 'string'
           ? JSON.parse(result.answer.replace(/^```json|```$/g, '').trim())
           : result.answer;
-        
+
         if (!Array.isArray(parsedResult)) {
           throw new Error("Response was not an array");
         }
-        
+
         return parsedResult;
       } catch (parseError) {
         console.error("Failed to parse Pinecone response:", parseError);
@@ -146,28 +144,27 @@ Return ONLY a valid JSON array with 7 days of meal plans. Example:
       }
     } catch (pineconeError) {
       console.error("Pinecone retrieval failed:", pineconeError);
-      // Continue to fallback
     }
   }
 
-  // Fallback to direct generation if Pinecone fails
+  // Fallback to direct generation
   try {
     const result = await llm.invoke([
       ["system", "You are a certified nutritionist. Return ONLY valid JSON."],
       ["human", dietPrompt]
     ]);
 
-    const content = typeof result.content === 'string' 
-      ? result.content 
+    const content = typeof result.content === 'string'
+      ? result.content
       : JSON.stringify(result.content);
-    
+
     const cleaned = content.trim().replace(/^```json\s*|\s*```$/g, '');
     const parsed = JSON.parse(cleaned);
-    
+
     if (!Array.isArray(parsed)) {
       throw new Error("Generated plan is not an array");
     }
-    
+
     return parsed;
   } catch (genError) {
     console.error("Direct generation failed:", genError);
@@ -175,11 +172,10 @@ Return ONLY a valid JSON array with 7 days of meal plans. Example:
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body: RequestBody = await req.json();
 
-    // Validate input
     if (!body.userData?.weight || !body.userData?.height) {
       throw new Error('Weight and height are required');
     }
@@ -187,7 +183,6 @@ export async function POST(req: Request) {
       throw new Error('Native region and cuisine preferences are required');
     }
 
-    // Calculate BMI if not provided
     if (!body.userData.bmi) {
       const heightInMeters = body.userData.height / 100;
       body.userData.bmi = parseFloat((body.userData.weight / (heightInMeters * heightInMeters)).toFixed(1));
@@ -196,13 +191,14 @@ export async function POST(req: Request) {
     const dietPlan = await generateDietPlan(body);
     return NextResponse.json({ success: true, dietPlan });
 
-  } catch (error: any) {
-    console.error("Diet generation error:", error);
+  } catch (error) {
+    const err = error as Error;
+    console.error("Diet generation error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: err.message,
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
       },
       { status: 500 }
     );

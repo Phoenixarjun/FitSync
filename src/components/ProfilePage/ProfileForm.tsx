@@ -5,11 +5,12 @@ import { FaLock } from "react-icons/fa6";
 import { TbLoader3 } from "react-icons/tb";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-export default function ProfileForm({ 
-  handleIsProfileCreated 
-}: { 
-  handleIsProfileCreated: (status: boolean) => void 
+export default function ProfileForm({
+  handleIsProfileCreated
+}: {
+  handleIsProfileCreated: (status: boolean) => void
 }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -26,7 +27,7 @@ export default function ProfileForm({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { setUser, fetchUserData } = useUser();
+  const { fetchUserData } = useUser();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,7 +36,7 @@ export default function ProfileForm({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Validate email on change
     if (name === 'email') {
       const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -61,7 +62,7 @@ export default function ProfileForm({
   };
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { 'image/*': ['.jpeg', '.png', '.jpg'] as const }, 
+    accept: { 'image/*': ['.jpeg', '.png', '.jpg'] as const },
     onDrop: handleFileUpload,
   });
 
@@ -69,7 +70,7 @@ export default function ProfileForm({
     e.preventDefault();
     setIsSubmitting(true);
     setMessage('');
-    
+
     // Validate form before submission
     const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     if (!emailRegex.test(formData.email)) {
@@ -103,9 +104,9 @@ export default function ProfileForm({
       await fetchUserData(data.user.username);
       handleIsProfileCreated(true);
       router.push('/profile');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
-      setMessage(error.message || 'An error occurred during registration');
+      setMessage(error instanceof Error ? error.message : 'An error occurred during registration');
     } finally {
       setIsSubmitting(false);
     }
@@ -257,7 +258,13 @@ export default function ProfileForm({
                 <input {...getInputProps()} id="profilePhoto" name="profilePhoto" type="file" />
                 {formData.profilePhoto ? (
                   <div className="mt-4">
-                    <img src={formData.profilePhoto} alt="Profile Preview" className="w-24 h-24 rounded-full mx-auto" />
+                    <Image 
+                      src={formData.profilePhoto} 
+                      alt="Profile Preview" 
+                      width={96}
+                      height={96}
+                      className="w-24 h-24 rounded-full mx-auto"
+                    />
                   </div>
                 ) : (
                   <p className="text-center text-gray-400">Drag and drop a photo, or click to select</p>

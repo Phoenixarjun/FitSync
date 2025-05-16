@@ -28,14 +28,15 @@ export default function DietTabs() {
   });
 
   const handleSubmit = () => {
-    const dietPreferences = {
-      native: preferences.native === 'Others' ? preferences.customNative : preferences.native,
-      cuisine: preferences.cuisine === 'Others' ? preferences.customCuisine : preferences.cuisine,
-    };
-    
-    // Switch to AI-Enhanced tab after submission
     setActiveTab('ai-enhanced');
     setAiError(false);
+  };
+
+  const resolvedPreferences = {
+    native: preferences.native === 'Others' ? preferences.customNative : preferences.native,
+    cuisine: preferences.cuisine === 'Others' ? preferences.customCuisine : preferences.cuisine,
+    customNative: preferences.customNative,
+    customCuisine: preferences.customCuisine,
   };
 
   return (
@@ -52,7 +53,7 @@ export default function DietTabs() {
             <label className="mb-1 font-medium">Native</label>
             <select
               value={preferences.native}
-              onChange={e => setPreferences({...preferences, native: e.target.value})}
+              onChange={e => setPreferences({ ...preferences, native: e.target.value })}
               className="rounded px-3 py-2 text-white bg-white/20 border border-white/30"
             >
               <option value="">Select</option>
@@ -68,7 +69,7 @@ export default function DietTabs() {
                 placeholder="Enter your native"
                 className="mt-2 px-3 py-2 rounded text-white bg-white/20 border border-white/30"
                 value={preferences.customNative}
-                onChange={e => setPreferences({...preferences, customNative: e.target.value})}
+                onChange={e => setPreferences({ ...preferences, customNative: e.target.value })}
               />
             )}
           </div>
@@ -78,7 +79,7 @@ export default function DietTabs() {
             <label className="mb-1 font-medium">Cuisine Type</label>
             <select
               value={preferences.cuisine}
-              onChange={e => setPreferences({...preferences, cuisine: e.target.value})}
+              onChange={e => setPreferences({ ...preferences, cuisine: e.target.value })}
               className="rounded px-3 py-2 text-white bg-white/20 border border-white/30"
             >
               <option value="">Select</option>
@@ -94,7 +95,7 @@ export default function DietTabs() {
                 placeholder="Enter your cuisine preference"
                 className="mt-2 px-3 py-2 rounded text-white bg-white/20 border border-white/30"
                 value={preferences.customCuisine}
-                onChange={e => setPreferences({...preferences, customCuisine: e.target.value})}
+                onChange={e => setPreferences({ ...preferences, customCuisine: e.target.value })}
               />
             )}
           </div>
@@ -136,8 +137,8 @@ export default function DietTabs() {
           </Tabs.Content>
 
           <Tabs.Content value="ai-enhanced">
-            <AIEnhancedDiet 
-              preferences={preferences} 
+            <AIEnhancedDiet
+              preferences={resolvedPreferences}
               onError={() => {
                 setAiError(true);
                 setActiveTab('personalized');
