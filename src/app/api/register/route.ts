@@ -10,10 +10,10 @@ export async function POST(request: Request) {
 
     // Parse incoming data
     const data = await request.json();
-    console.log('Incoming data:', data); // Debug log
+    console.log('Incoming data:', data);
 
     // Validate required fields
-    const requiredFields = ['name', 'age', 'sex', 'weight', 'height', 'bmi', 'username', 'password', 'confirmPassword'];
+    const requiredFields = ['name', 'email', 'age', 'sex', 'weight', 'height', 'bmi', 'username', 'password', 'confirmPassword'];
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
@@ -21,6 +21,15 @@ export async function POST(request: Request) {
           { status: 400 }
         );
       }
+    }
+
+    // Validate email format
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(data.email)) {
+      return NextResponse.json(
+        { success: false, message: 'Please enter a valid email address' },
+        { status: 400 }
+      );
     }
 
     // Check password match
@@ -31,11 +40,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if user exists
-    const existingUser = await User.findOne({ username: data.username });
-    if (existingUser) {
+    // Check if username exists
+    const existingUsername = await User.findOne({ username: data.username });
+    if (existingUsername) {
       return NextResponse.json(
         { success: false, message: 'Username already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Check if email exists
+    const existingEmail = await User.findOne({ email: data.email });
+    if (existingEmail) {
+      return NextResponse.json(
+        { success: false, message: 'Email already exists' },
         { status: 409 }
       );
     }
@@ -48,6 +66,7 @@ export async function POST(request: Request) {
     const newUser = new User({
       userId: crypto.randomUUID(),
       name: data.name,
+      email: data.email,
       age: Number(data.age),
       sex: data.sex,
       weight: Number(data.weight),
@@ -66,6 +85,7 @@ export async function POST(request: Request) {
       user: {
         userId: newUser.userId,
         name: newUser.name,
+        email: newUser.email,
         age: newUser.age,
         sex: newUser.sex,
         weight: newUser.weight,

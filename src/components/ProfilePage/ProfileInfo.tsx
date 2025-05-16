@@ -4,10 +4,14 @@ import { FaWeight, FaRulerVertical, FaVenusMars } from "react-icons/fa";
 import { RiUser3Fill } from "react-icons/ri";
 import { IoMdFitness } from "react-icons/io";
 import { useUser } from "@/context/UserContext";
+import { useState } from "react";
+import UpdateProfileForm from "./UpdateProfileForm";
+import UpdateProfilePhoto from "./UpdateProfilePhoto";
 
 export default function ProfileInfo() {
   const { user } = useUser();
-  console.log("User data:", user);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   
   if (!user) {
     return <div className="text-red-500">User data not found</div>;
@@ -43,9 +47,13 @@ export default function ProfileInfo() {
     return "Obese";
   }
 
+  if (isEditing) {
+    return <UpdateProfileForm onCancel={() => setIsEditing(false)} />;
+  }
 
-
-  
+  if (isEditingPhoto) {
+    return <UpdateProfilePhoto onCancel={() => setIsEditingPhoto(false)} />;
+  }
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -66,7 +74,10 @@ export default function ProfileInfo() {
                     <RiUser3Fill className="text-gray-400 text-5xl" />
                   </div>
                 )}
-                <button className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-md transition-all transform hover:scale-110">
+                <button 
+                  onClick={() => setIsEditingPhoto(true)}
+                  className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-md transition-all transform hover:scale-110"
+                >
                   <FiEdit className="text-lg" />
                 </button>
               </div>
@@ -110,7 +121,10 @@ export default function ProfileInfo() {
             </div>
 
             <div className="mt-8 flex justify-end">
-              <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
                 <FiEdit /> Edit Profile
               </button>
             </div>

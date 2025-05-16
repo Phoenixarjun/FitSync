@@ -20,7 +20,7 @@ export default function Sidebar() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen max-w-md bg-gray-800/50 backdrop-blur-lg shadow-2xl shadow-white/20 p-6">
-        <div className="text-gray-300">Please login to view your profile</div>
+        <div className="text-gray-300 text-center">Please login to view your profile</div>
       </div>
     );
   }

@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import ProfileForm from "@/components/ProfileForm";
-import ProfileInfo from "@/layouts/ProfileInfo";
+import ProfileForm from "@/components/ProfilePage/ProfileForm";
+import ProfileInfo from "@/components/ProfilePage/ProfileInfo";
 import { useUser } from "@/context/UserContext";
 import Loader from "@/components/Loader";
 

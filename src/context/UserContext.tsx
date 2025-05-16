@@ -5,6 +5,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 export type UserData = {
   userId: string;
   name: string;
+  email: string;
   age: number;
   sex: string;
   weight: number;
@@ -46,7 +47,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   
       if (data.success && data.user) {
         setUser(data.user);
-        // Store only a token or minimal user data in localStorage (for example, use a JWT token)
       } else {
         throw new Error('User data not found or invalid.');
       }
@@ -71,17 +71,16 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { username } = JSON.parse(storedUser);
         if (username) {
-          fetchUserData(username); // Fetch user data based on username from localStorage
+          fetchUserData(username);
           return;
         }
       } catch (e) {
         console.error('Error parsing stored user data:', e);
       }
     }
-    setLoading(false); // If no stored user data, set loading to false
+    setLoading(false);
   }, []);
 
-  // Provide the context values to child components
   return (
     <UserContext.Provider value={{ user, setUser, fetchUserData, loading, logout }}>
       {children}

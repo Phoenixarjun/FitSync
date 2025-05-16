@@ -13,6 +13,7 @@ export default function ProfileForm({
 }) {
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     age: '',
     sex: '',
     weight: '',
@@ -24,6 +25,7 @@ export default function ProfileForm({
     confirmPassword: '',
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { setUser, fetchUserData } = useUser();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +35,18 @@ export default function ProfileForm({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Validate email on change
+    if (name === 'email') {
+      const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      if (!emailRegex.test(value)) {
+        setErrors({ ...errors, email: 'Please enter a valid email address' });
+      } else {
+        const newErrors = { ...errors };
+        delete newErrors.email;
+        setErrors(newErrors);
+      }
+    }
   };
 
   const handleFileUpload = (acceptedFiles: File[]) => {
@@ -56,6 +70,14 @@ export default function ProfileForm({
     setIsSubmitting(true);
     setMessage('');
     
+    // Validate form before submission
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(formData.email)) {
+      setMessage('Please enter a valid email address');
+      setIsSubmitting(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setMessage('Passwords do not match!');
       setIsSubmitting(false);
@@ -77,7 +99,7 @@ export default function ProfileForm({
 
       setIsSuccess(true);
       setMessage(data.message);
-      localStorage.setItem('user', JSON.stringify({ username: data.user.username }));
+      localStorage.setItem('user', JSON.stringify({ username: data.user.username, isVerified: true }));
       await fetchUserData(data.user.username);
       handleIsProfileCreated(true);
       router.push('/profile');
@@ -88,7 +110,6 @@ export default function ProfileForm({
       setIsSubmitting(false);
     }
   };
-
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
@@ -119,6 +140,24 @@ export default function ProfileForm({
                 placeholder="John Doe"
                 required
               />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                placeholder="john@example.com"
+                required
+              />
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
             </div>
 
             {/* Age and Sex in one row */}
@@ -257,10 +296,9 @@ export default function ProfileForm({
                 required
               />
             </div>
-            {/* Confirm Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                ConfirmPassword
+                Confirm Password
               </label>
               <input
                 id="confirmPassword"
@@ -274,17 +312,22 @@ export default function ProfileForm({
               />
             </div>
           </div>
-          {isSuccess && <div><p>{message}</p></div>}
+          
+          {message && (
+            <div className={`text-sm ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>
+              {message}
+            </div>
+          )}
+          
           <div>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || Object.keys(errors).length > 0}
               className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 {isSubmitting ? (
                   <TbLoader3 className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'/>
-
                 ) : (
                   <FaLock className="h-5 w-5 text-purple-300 group-hover:text-purple-200"/>
                 )}

@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       user: {
         userId: user.userId,
         name: user.name,
+        email: user.email,
         age: user.age,
         sex: user.sex,
         weight: user.weight,
