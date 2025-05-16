@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define MONGODB_URI environment variable');
+  throw new Error("Please define MONGODB_URI environment variable");
 }
 
 type MongooseCache = {
@@ -15,12 +15,10 @@ declare global {
   var mongoose: MongooseCache | undefined;
 }
 
-// Initialize cached if not present
 if (!global.mongoose) {
   global.mongoose = { conn: null, promise: null };
 }
 
-// Now cached is definitely defined
 const cached = global.mongoose;
 
 async function connectDB() {
