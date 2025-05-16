@@ -11,9 +11,11 @@ type MongooseCache = {
   promise: Promise<typeof mongoose> | null;
 };
 
+/* eslint-disable no-var */
 declare global {
   var mongoose: MongooseCache | undefined;
 }
+/* eslint-enable no-var */
 
 if (!global.mongoose) {
   global.mongoose = { conn: null, promise: null };
