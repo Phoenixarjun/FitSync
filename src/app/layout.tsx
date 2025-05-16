@@ -6,6 +6,9 @@ import { UserProvider } from "@/context/UserContext";
 export const metadata: Metadata = {
   title: "FitSync",
   description: "Personalized fitness tracking and coaching",
+    icons: {
+    icon: "/logoTransparent.png", 
+  },
 };
 
 export default function RootLayout({
