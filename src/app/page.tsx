@@ -8,6 +8,5 @@ export default function Home() {
       <Navbar />
       <HomeLayout />
     </div>
-    
   );
 }

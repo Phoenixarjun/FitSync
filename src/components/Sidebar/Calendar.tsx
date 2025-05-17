@@ -81,7 +81,7 @@ export default function WorkoutCalendar() {
   };
 
   if (loading) {
-    return <div className="text-white">Loading calendar...</div>;
+    return <div className="text-white text-center">Loading calendar...</div>;
   }
 
   return (

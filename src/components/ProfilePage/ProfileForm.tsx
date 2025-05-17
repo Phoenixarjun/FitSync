@@ -1,7 +1,7 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FaLock } from "react-icons/fa6";
+import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { TbLoader3 } from "react-icons/tb";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
@@ -32,22 +32,94 @@ export default function ProfileForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [message, setMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  useEffect(() => {
+    // Calculate password strength whenever password changes
+    if (formData.password) {
+      let strength = 0;
+      
+      // Length check
+      if (formData.password.length >= 8) strength += 1;
+      
+      // Contains number
+      if (/\d/.test(formData.password)) strength += 1;
+      
+      // Contains uppercase
+      if (/[A-Z]/.test(formData.password)) strength += 1;
+      
+      // Contains special char
+      if (/[^A-Za-z0-9]/.test(formData.password)) strength += 1;
+      
+      setPasswordStrength(strength);
+    } else {
+      setPasswordStrength(0);
+    }
+  }, [formData.password]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Validate email on change
+    // Validate fields on change
+    const newErrors = { ...errors };
+    
     if (name === 'email') {
       const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
       if (!emailRegex.test(value)) {
-        setErrors({ ...errors, email: 'Please enter a valid email address' });
+        newErrors.email = 'Please enter a valid email address';
       } else {
-        const newErrors = { ...errors };
         delete newErrors.email;
-        setErrors(newErrors);
       }
     }
+
+    if (name === 'age') {
+      const ageNum = Number(value);
+      if (isNaN(ageNum)) {
+        newErrors.age = 'Age must be a number';
+      } else if (ageNum < 13 || ageNum > 120) {
+        newErrors.age = 'Age must be between 13 and 120';
+      } else {
+        delete newErrors.age;
+      }
+    }
+
+    if (name === 'weight') {
+      const weightNum = Number(value);
+      if (isNaN(weightNum)) {
+        newErrors.weight = 'Weight must be a number';
+      } else if (weightNum < 30 || weightNum > 300) {
+        newErrors.weight = 'Weight must be between 30kg and 300kg';
+      } else {
+        delete newErrors.weight;
+      }
+    }
+
+    if (name === 'height') {
+      const heightNum = Number(value);
+      if (isNaN(heightNum)) {
+        newErrors.height = 'Height must be a number';
+      } else if (heightNum < 100 || heightNum > 250) {
+        newErrors.height = 'Height must be between 100cm and 250cm';
+      } else {
+        delete newErrors.height;
+      }
+    }
+
+    if (name === 'bmi') {
+      const bmiNum = Number(value);
+      if (isNaN(bmiNum)) {
+        newErrors.bmi = 'BMI must be a number';
+      } else if (bmiNum < 10 || bmiNum > 50) {
+        newErrors.bmi = 'BMI must be between 10 and 50';
+      } else {
+        delete newErrors.bmi;
+      }
+    }
+
+    setErrors(newErrors);
   };
 
   const handleFileUpload = (acceptedFiles: File[]) => {
@@ -64,6 +136,7 @@ export default function ProfileForm({
   const { getRootProps, getInputProps } = useDropzone({
     accept: { 'image/*': ['.jpeg', '.png', '.jpg'] as const },
     onDrop: handleFileUpload,
+    maxFiles: 1,
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,9 +145,8 @@ export default function ProfileForm({
     setMessage('');
 
     // Validate form before submission
-    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailRegex.test(formData.email)) {
-      setMessage('Please enter a valid email address');
+    if (Object.keys(errors).length > 0) {
+      setMessage('Please fix the errors in the form');
       setIsSubmitting(false);
       return;
     }
@@ -112,9 +184,31 @@ export default function ProfileForm({
     }
   };
 
+  const getPasswordStrengthColor = () => {
+    switch (passwordStrength) {
+      case 0: return 'bg-gray-500';
+      case 1: return 'bg-red-500';
+      case 2: return 'bg-yellow-500';
+      case 3: return 'bg-blue-500';
+      case 4: return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getPasswordStrengthText = () => {
+    switch (passwordStrength) {
+      case 0: return '';
+      case 1: return 'Weak';
+      case 2: return 'Moderate';
+      case 3: return 'Strong';
+      case 4: return 'Very Strong';
+      default: return '';
+    }
+  };
+
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8 bg-gray p-10 rounded-xl shadow-2xl transform transition-all duration-500 hover:scale-[1.01]">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center ">
+      <div className="max-w-md w-full space-y-8 bg-gray-800 p-10 rounded-xl shadow-2xl transform transition-all duration-500 hover:scale-[1.01] border border-gray-700">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-white">
             Create Your Profile
@@ -173,10 +267,13 @@ export default function ProfileForm({
                   name="age"
                   value={formData.age}
                   onChange={handleChange}
+                  min="13"
+                  max="120"
                   className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="25"
                   required
                 />
+                {errors.age && <p className="mt-1 text-sm text-red-500">{errors.age}</p>}
               </div>
               <div>
                 <label htmlFor="sex" className="block text-sm font-medium text-gray-300 mb-1">
@@ -210,10 +307,13 @@ export default function ProfileForm({
                   name="weight"
                   value={formData.weight}
                   onChange={handleChange}
+                  min="30"
+                  max="300"
                   className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="70"
                   required
                 />
+                {errors.weight && <p className="mt-1 text-sm text-red-500">{errors.weight}</p>}
               </div>
               <div>
                 <label htmlFor="height" className="block text-sm font-medium text-gray-300 mb-1">
@@ -225,10 +325,13 @@ export default function ProfileForm({
                   name="height"
                   value={formData.height}
                   onChange={handleChange}
+                  min="100"
+                  max="250"
                   className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="175"
                   required
                 />
+                {errors.height && <p className="mt-1 text-sm text-red-500">{errors.height}</p>}
               </div>
             </div>
 
@@ -243,10 +346,14 @@ export default function ProfileForm({
                 name="bmi"
                 value={formData.bmi}
                 onChange={handleChange}
+                min="10"
+                max="50"
+                step="0.1"
                 className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="22"
                 required
               />
+              {errors.bmi && <p className="mt-1 text-sm text-red-500">{errors.bmi}</p>}
             </div>
 
             {/* Profile Photo (Upload) */}
@@ -254,7 +361,7 @@ export default function ProfileForm({
               <label htmlFor="profilePhoto" className="block text-sm font-medium text-gray-300 mb-1">
                 Profile Photo
               </label>
-              <div {...getRootProps()} className="border-2 border-dashed border-gray-600 rounded-lg p-4 cursor-pointer bg-gray-700 text-white">
+              <div {...getRootProps()} className="border-2 border-dashed border-gray-600 rounded-lg p-4 cursor-pointer bg-gray-700 text-white hover:border-purple-500 transition-colors duration-200">
                 <input {...getInputProps()} id="profilePhoto" name="profilePhoto" type="file" />
                 {formData.profilePhoto ? (
                   <div className="mt-4">
@@ -263,8 +370,9 @@ export default function ProfileForm({
                       alt="Profile Preview" 
                       width={96}
                       height={96}
-                      className="w-24 h-24 rounded-full mx-auto"
+                      className="w-24 h-24 rounded-full mx-auto object-cover"
                     />
+                    <p className="text-center text-gray-400 mt-2">Click to change photo</p>
                   </div>
                 ) : (
                   <p className="text-center text-gray-400">Drag and drop a photo, or click to select</p>
@@ -272,7 +380,7 @@ export default function ProfileForm({
               </div>
             </div>
 
-            {/* Username and Password */}
+            {/* Username */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
                 Username
@@ -288,35 +396,77 @@ export default function ProfileForm({
                 required
               />
             </div>
+
+            {/* Password with toggle */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="••••••••"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              
+              {/* Password strength indicator */}
+              {formData.password && (
+                <div className="mt-2">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div 
+                        key={i}
+                        className={`h-1 flex-1 rounded-full ${i <= passwordStrength ? getPasswordStrengthColor() : 'bg-gray-600'}`}
+                      />
+                    ))}
+                  </div>
+                  <p className={`text-xs mt-1 ${getPasswordStrengthColor().replace('bg', 'text')}`}>
+                    {getPasswordStrengthText()}
+                  </p>
+                </div>
+              )}
             </div>
+
+            {/* Confirm Password with toggle */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="••••••••"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="appearance-none relative block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                <p className="mt-1 text-sm text-red-500">Passwords don't match</p>
+              )}
             </div>
           </div>
           
