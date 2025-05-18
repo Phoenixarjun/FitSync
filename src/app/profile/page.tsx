@@ -5,6 +5,7 @@ import ProfileForm from "@/components/ProfilePage/ProfileForm";
 import ProfileInfo from "@/components/ProfilePage/ProfileInfo";
 import { useUser } from "@/context/UserContext";
 import Loader from "@/components/Loader";
+import Footer from "@/components/Footer";
 
 export default function Profile() {
   const { user, loading } = useUser();
@@ -38,6 +39,7 @@ export default function Profile() {
           <ProfileForm handleIsProfileCreated={handleIsProfileCreated} />
         )}
       </div>
+      <Footer />
     </div>
   );
 }

@@ -29,13 +29,13 @@ const ChatBot: React.FC = () => {
         return <p key={i} className="flex"><span className="mr-2">•</span>{line.substring(2)}</p>;
       }
       if (line.startsWith('👍 ')) {
-        return <p key={i} className="text-green-400 flex items-center"><span className="mr-2">✓</span>{line.substring(2)}</p>;
+        return <p key={i} className=" flex items-center"><span className="mr-2">✓</span>{line.substring(2)}</p>;
       }
       if (line.startsWith('👎 ')) {
-        return <p key={i} className="text-red-400 flex items-center"><span className="mr-2">✗</span>{line.substring(2)}</p>;
+        return <p key={i} className="flex items-center"><span className="mr-2">✗</span>{line.substring(2)}</p>;
       }
       if (line.startsWith('*') && line.endsWith('*')) {
-        return <p key={i} className="text-gray-400 italic">{line.replace(/\*/g, '')}</p>;
+        return <p key={i} className=" italic">{line.replace(/\*/g, '')}</p>;
       }
       if (line.trim() === '') {
         return <br key={i} />;

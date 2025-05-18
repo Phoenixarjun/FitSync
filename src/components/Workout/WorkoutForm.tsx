@@ -71,16 +71,23 @@ const exercisesData = {
     { name: "Dumbbell squat", category: "leg" },
     { name: "Barbell squat", category: "leg" },
     { name: "Single-leg squat", category: "leg" },
-    { name: "Romanian deadlift", category: "leg" }
+    { name: "Romanian deadlift", category: "leg" },
+    { name: "Leg press machine", category: "leg" },
+    { name: "Leg curl machine", category: "leg" },
+    { name: "Leg extension machine", category: "leg" },
+    { name: "Hack Squat machine", category: "leg" }
   ],
   chest: [
     { name: "Bench press", category: "chest" },
-    { name: "Dumbbell Flyes", category: "chest" },
+    { name: "Dumbbell flyes", category: "chest" },
     { name: "Push-up", category: "chest" },
     { name: "Wall push-ups", category: "chest" },
     { name: "Floor press", category: "chest" },
     { name: "Alternating floor press", category: "chest" },
-    { name: "Low cable crossover", category: "chest" }
+    { name: "Low cable crossover", category: "chest" },
+    { name: "Chest press machine", category: "chest" },
+    { name: "Cable crossover machine", category: "chest" },
+    { name: "Smith machine bench press", category: "chest" }
   ],
   fullBody: [
     { name: "Deadlift", category: "fullBody" },
@@ -88,13 +95,17 @@ const exercisesData = {
     { name: "Barbell deadlift", category: "fullBody" },
     { name: "Barbell glute bridge", category: "fullBody" },
     { name: "Power training", category: "fullBody" },
-    { name: "Calisthenics", category: "fullBody" }
+    { name: "Calisthenics", category: "fullBody" },
+    { name: "Kettlebell swings", category: "fullBody" },
+    { name: "Resistance band circuits", category: "fullBody" }
   ],
   biceps: [
     { name: "Bicep curl", category: "biceps" },
     { name: "Pull-up", category: "biceps" },
     { name: "Pull-down", category: "biceps" },
-    { name: "Bent-over row", category: "biceps" }
+    { name: "Bent-over row", category: "biceps" },
+    { name: "Cable curls", category: "biceps" },
+    { name: "Preacher curl machine", category: "biceps" }
   ],
   abs: [
     { name: "Plank", category: "abs" },
@@ -102,25 +113,38 @@ const exercisesData = {
     { name: "Russian twist", category: "abs" },
     { name: "Dead bug", category: "abs" },
     { name: "Bird dog exercise", category: "abs" },
-    { name: "Roman Chair Back Extension", category: "abs" }
+    { name: "Roman Chair Back Extension", category: "abs" },
+    { name: "Cable crunch", category: "abs" },
+    { name: "Ab roller", category: "abs" }
   ],
   back: [
     { name: "Pull-up", category: "back" },
     { name: "Pull-down", category: "back" },
     { name: "Bent-over row", category: "back" },
-    { name: "Roman Chair Back Extension", category: "back" }
+    { name: "Roman Chair Back Extension", category: "back" },
+    { name: "Lat pulldown machine", category: "back" },
+    { name: "Seated row machine", category: "back" },
+    { name: "T-bar row", category: "back" }
   ],
   shoulders: [
     { name: "Overhead press", category: "shoulders" },
     { name: "Side lateral raise", category: "shoulders" },
     { name: "Arnold press", category: "shoulders" },
-    { name: "Overhead Triceps Extension", category: "shoulders" }
+    { name: "Overhead triceps extension", category: "shoulders" },
+    { name: "Cable lateral raise", category: "shoulders" },
+    { name: "Smith machine shoulder press", category: "shoulders" }
   ],
   cardio: [
     { name: "Treadmill", category: "cardio" },
     { name: "Upright bike", category: "cardio" },
-    { name: "Cross Trainers", category: "cardio" },
-    { name: "HIIT workout", category: "cardio" }
+    { name: "Cross trainers", category: "cardio" },
+    { name: "HIIT workout", category: "cardio" },
+    { name: "Rowing machine", category: "cardio" },
+    { name: "Elliptical trainer", category: "cardio" },
+    { name: "Stair climber", category: "cardio" },
+    { name: "Exercise bike", category: "cardio" },
+    { name: "Stationary bike", category: "cardio" },
+    { name: "Jump rope", category: "cardio" }
   ],
   other: [
     { name: "Pilates", category: "other" },
@@ -131,7 +155,17 @@ const exercisesData = {
     { name: "Step-up", category: "other" },
     { name: "Deadlift to upright row", category: "other" },
     { name: "Seated calf raise", category: "other" },
-    { name: "Partial reps", category: "other" }
+    { name: "Partial reps", category: "other" },
+    { name: "Dumbbells", category: "other" },
+    { name: "Barbell", category: "other" },
+    { name: "Cable machine", category: "other" },
+    { name: "Smith machine", category: "other" },
+    { name: "Power rack", category: "other" },
+    { name: "Pullup bar", category: "other" },
+    { name: "Resistance bands", category: "other" },
+    { name: "Weight plates", category: "other" },
+    { name: "Adjustable bench", category: "other" },
+    { name: "Bench", category: "other" }
   ]
 };
 
@@ -296,7 +330,7 @@ export default function WorkoutForm() {
           value={value}
           className={classNames(
             "relative flex items-center pl-6 pr-4 py-2 rounded text-sm leading-none select-none",
-            "data-[highlighted]:bg-teal-800 data-[highlighted]:text-white outline-none",
+            "data-[highlighted]:bg-orange-500/50 data-[highlighted]:text-white outline-none",
             "data-[highlighted]:outline-none text-gray-300",
             className
           )}
@@ -305,7 +339,7 @@ export default function WorkoutForm() {
         >
           <Select.ItemText>{children}</Select.ItemText>
           <Select.ItemIndicator className="absolute left-1 inline-flex items-center justify-center w-4">
-            <CheckIcon className="text-teal-400" />
+            <CheckIcon className="text-orange-400" />
           </Select.ItemIndicator>
         </Select.Item>
       );
@@ -314,9 +348,9 @@ export default function WorkoutForm() {
   SelectItem.displayName = 'SelectItem';
 
   return (
-    <div className="flex flex-col items-center justify-center w-screen min-h-screen py-8 px-4 bg-gray-900">
-      <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-lg p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center text-white">Workout Tracker</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4 ">
+      <div className="w-full max-w-3xl rounded-xl shadow-lg p-6 bg-white/10 backdrop-blur-md border border-white/20">
+        <h1 className="text-3xl font-bold mb-6 text-center text-white">Workout Tracker</h1>
         
         <Tabs.Root 
           className="flex flex-col"
@@ -328,7 +362,7 @@ export default function WorkoutForm() {
               value="cardio"
               className={classNames(
                 "flex-1 py-3 px-4 text-sm font-medium rounded-md transition-all",
-                "data-[state=active]:bg-gray-600 data-[state=active]:text-teal-400 data-[state=active]:shadow-sm",
+                "data-[state=active]:bg-gray-600 data-[state=active]:text-orange-400 data-[state=active]:shadow-sm",
                 "text-gray-300 hover:text-white"
               )}
             >
@@ -338,7 +372,7 @@ export default function WorkoutForm() {
               value="weight"
               className={classNames(
                 "flex-1 py-3 px-4 text-sm font-medium rounded-md transition-all",
-                "data-[state=active]:bg-gray-600 data-[state=active]:text-teal-400 data-[state=active]:shadow-sm",
+                "data-[state=active]:bg-gray-600 data-[state=active]:text-orange-400 data-[state=active]:shadow-sm",
                 "text-gray-300 hover:text-white"
               )}
             >
@@ -355,7 +389,7 @@ export default function WorkoutForm() {
               id="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -373,7 +407,7 @@ export default function WorkoutForm() {
                     className={classNames(
                       "py-2 px-3 rounded-md text-sm font-medium transition-all",
                       cardioType === type 
-                        ? "bg-teal-600 text-white" 
+                        ? "bg-orange-500 text-white" 
                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                     )}
                   >
@@ -394,7 +428,7 @@ export default function WorkoutForm() {
                     value={time}
                     onChange={(e) => setTime(Number(e.target.value))}
                     min="1"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -409,7 +443,7 @@ export default function WorkoutForm() {
                     onChange={(e) => setSpeed(Number(e.target.value))}
                     min="1"
                     step="0.1"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -424,7 +458,7 @@ export default function WorkoutForm() {
                     onChange={(e) => setDistance(Number(e.target.value))}
                     min="0.1"
                     step="0.1"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -432,7 +466,7 @@ export default function WorkoutForm() {
               <button
                 type="button"
                 onClick={addCardioExercise}
-                className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all"
+                className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all"
               >
                 <PlusIcon /> Add Cardio Session
               </button>
@@ -476,7 +510,7 @@ export default function WorkoutForm() {
                   </label>
                   <Select.Root value={selectedCategory} onValueChange={setSelectedCategory}>
                     <Select.Trigger
-                      className="flex items-center justify-between w-full px-3 py-2 text-sm rounded-md bg-gray-700 border border-gray-600 text-white hover:bg-gray-600 outline-none focus:ring-2 focus:ring-teal-500"
+                      className="flex items-center justify-between w-full px-3 py-2 text-sm rounded-md bg-gray-700 border border-gray-600 text-white hover:bg-gray-600 outline-none focus:ring-2 focus:ring-orange-500"
                       aria-label="Exercise category"
                     >
                       <Select.Value>{exerciseCategories[selectedCategory as keyof typeof exerciseCategories]}</Select.Value>
@@ -523,7 +557,7 @@ export default function WorkoutForm() {
                     }}
                   >
                     <Select.Trigger
-                      className="flex items-center justify-between w-full px-3 py-2 text-sm rounded-md bg-gray-700 border border-gray-600 text-white hover:bg-gray-600 outline-none focus:ring-2 focus:ring-teal-500"
+                      className="flex items-center justify-between w-full px-3 py-2 text-sm rounded-md bg-gray-700 border border-gray-600 text-white hover:bg-gray-600 outline-none focus:ring-2 focus:ring-orange-500"
                       aria-label="Exercise"
                     >
                       <Select.Value placeholder="Select an exercise..." />
@@ -571,7 +605,7 @@ export default function WorkoutForm() {
                     value={customExercise}
                     onChange={(e) => setCustomExercise(e.target.value)}
                     placeholder="Enter exercise name"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               )}
@@ -587,7 +621,7 @@ export default function WorkoutForm() {
                     value={sets}
                     onChange={(e) => setSets(Number(e.target.value))}
                     min="1"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
                 <div>
@@ -600,7 +634,7 @@ export default function WorkoutForm() {
                     value={reps}
                     onChange={(e) => setReps(Number(e.target.value))}
                     min="1"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -609,7 +643,7 @@ export default function WorkoutForm() {
                 type="button"
                 onClick={addWeightExercise}
                 disabled={!selectedExercise && !customExercise}
-                className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PlusIcon /> Add Exercise
               </button>
@@ -637,7 +671,7 @@ export default function WorkoutForm() {
                         </button>
                       </div>
                       <div className="mt-1">
-                        <span className="inline-block bg-teal-900 text-teal-300 text-xs px-2 py-1 rounded">
+                        <span className="inline-block bg-orange-900/30 text-orange-300 text-xs px-2 py-1 rounded">
                           {exerciseCategories[exercise.category as keyof typeof exerciseCategories]}
                         </span>
                       </div>
@@ -650,7 +684,7 @@ export default function WorkoutForm() {
         </Tabs.Root>
 
         {message && (
-          <div className={`mb-4 p-3 rounded-md ${message.includes("success") ? "bg-green-800 text-green-200" : "bg-red-800 text-red-200"}`}>
+          <div className={`mb-4 p-3 rounded-md ${message.includes("success") ? "bg-green-800/30 text-green-200" : "bg-red-800/30 text-red-200"}`}>
             {message}
           </div>
         )}
@@ -659,7 +693,7 @@ export default function WorkoutForm() {
           type="button"
           onClick={handleSubmit}
           disabled={(cardioExercises.length === 0 && weightExercises.length === 0) || isSubmitting}
-          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : "Save Complete Workout"}
         </button>

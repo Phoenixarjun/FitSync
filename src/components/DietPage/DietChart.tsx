@@ -40,9 +40,7 @@ export default function DietTabs() {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full bg-cover relative"
-      style={{ backgroundImage: "url('/dietBg.jpg')" }}>
-      <div className="absolute inset-0 bg-black opacity-60 z-0 pointer-events-none" />
+    <div className="flex flex-col items-center min-h-screen w-full relative">
 
       {/* FORM SECTION */}
       <div className="z-10 w-full max-w-4xl mt-8 bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-white/20 text-white">

@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import { useUser } from "@/context/UserContext";
 import Loader from "@/components/Loader";
 import DietLayout from "@/layouts/DietLayout"
+import Footer from "@/components/Footer";
 
 export default function Diet() {
   const { user, loading } = useUser();
@@ -26,6 +27,7 @@ export default function Diet() {
         )
       }
       </div>
+      <Footer />
     </div>
   );
 }

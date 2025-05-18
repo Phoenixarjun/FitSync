@@ -1,4 +1,3 @@
-// homepageLayout.tsx
 "use client"
 import React, {useState, useEffect} from 'react'
 import Sidebar from '@/components/Sidebar/Sidebar'
@@ -11,7 +10,7 @@ import { FiSidebar } from 'react-icons/fi'
 
 export default function HomeLayout() {
   const [isVerified, setIsVerified] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const checkVerification = () => {
     const storedUser = localStorage.getItem('user');
