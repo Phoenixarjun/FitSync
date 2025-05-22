@@ -71,7 +71,7 @@ export default function Navbar() {
       {/* Mobile Nav Toggle Button (left side) */}
       <button 
         onClick={() => setNavLinksOpen(!navLinksOpen)}
-        className="md:hidden absolute left-4 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"
+        className="md:hidden absolute left-4 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer cursor-pointer"
       >
         <FiMenu className="w-6 h-6" />
       </button>
@@ -142,10 +142,10 @@ export default function Navbar() {
       {/* Auth Section */}
       <div>
         {user ? (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 cursor-pointer">
             <button
               onClick={logout}
-              className="text-cyan-400 hover:text-purple-400 transition-colors"
+              className="text-cyan-400 hover:text-purple-400 transition-colors cursor-pointer"
             >
               Logout
             </button>
@@ -165,7 +165,7 @@ export default function Navbar() {
             </Dialog.Trigger>
 
             <Dialog.Portal>
-              <Dialog.Overlay className="bg-black/50 fixed inset-0 z-50 backdrop-blur-sm" />
+              <Dialog.Overlay className="bg-black/50 fixed inset-0 z-50 backdrop-blur-sm m-5" />
               <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 focus:outline-none">
                 <div className="flex justify-between items-center mb-6">
                   <Dialog.Title className="text-2xl font-bold text-white">
@@ -243,7 +243,7 @@ export default function Navbar() {
                       <Dialog.Close asChild>
                         <button
                           type="button"
-                          className="px-4 py-2 text-gray-300 hover:text-white rounded-lg transition-colors"
+                          className="px-4 py-2 text-gray-300 hover:text-white rounded-lg transition-colors cursor-pointer"
                           disabled={isLoading}
                         >
                           Cancel

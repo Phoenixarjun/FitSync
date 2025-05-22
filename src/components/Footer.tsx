@@ -14,7 +14,7 @@ export default function Footer() {
               <span className="text-2xl font-bold dark:text-white">Naresh B A</span>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm text-center md:text-left">
-              Full Stack Developer & Data Enthusiast
+              Full Stack Developer & Tech Enthusiast
             </p>
           </div>
 

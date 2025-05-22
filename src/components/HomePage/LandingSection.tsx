@@ -16,13 +16,13 @@ export default function LandingSection() {
         </video>
       </div>
 
-      <div className="z-10 mt-8 text-center text-white space-y-4 px-4">
+      <div className="z-10 mt-8 text-center text-white space-y-4 px-4 select-none">
         <h1 className="text-4xl font-extrabold tracking-wide">Push Your Limits</h1>
         <h2 className="text-2xl font-semibold">Train Hard. Stay Strong. Be Consistent.</h2>
         <h3 className="text-lg font-medium text-gray-200">Your only competition is who you were yesterday.</h3>
       </div>
 
-      <p className="z-10 mt-6 text-white text-center text-lg px-6">
+      <p className="z-10 mt-6 text-white text-center text-lg px-6 select-none">
         Add your workout details in the <span className="font-bold text-[#ff914d]">Workout</span> section to keep track of your progress.
       </p>
 

@@ -44,7 +44,7 @@ export default function WorkoutLayout() {
       {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute right-4 -top-15 z-50 p-3 bg-gray-800/80 rounded-full shadow-lg hover:bg-gray-700 transition-colors"
+          className="absolute cursor-pointer right-4 -top-15 z-50 p-3 bg-gray-800/80 rounded-full shadow-lg hover:bg-gray-700 transition-colors"
         >
           <FiSidebar className="w-5 h-5 text-white" />
         </button>
