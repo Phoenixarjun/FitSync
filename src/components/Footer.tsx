@@ -1,4 +1,4 @@
-import { FaGithub, FaLinkedin, FaKaggle, FaEnvelope } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaKaggle } from "react-icons/fa";
 import Image from "next/image";
 
 export default function Footer() {

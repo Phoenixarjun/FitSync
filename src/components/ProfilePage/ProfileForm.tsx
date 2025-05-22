@@ -214,7 +214,7 @@ export default function ProfileForm({
             Create Your Profile
           </h2>
           <p className="mt-2 text-sm text-gray-300">
-            {"Fill in your details to get started"}
+            Fill in your details to get started
           </p>
         </div>
         
