@@ -465,7 +465,7 @@ export default function ProfileForm({
                 </button>
               </div>
               {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="mt-1 text-sm text-red-500">Passwords don't match</p>
+                <p className="mt-1 text-sm text-red-500">Passwords don&apos;t match!</p>
               )}
             </div>
           </div>
