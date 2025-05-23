@@ -43,7 +43,7 @@ useEffect(() => {
     : preferences.cuisine;
 
   const currentKey = `${user.username}-${finalNative}-${finalCuisine}`;
-  if (fetchedKeyRef.current === currentKey) return; // already fetched for these prefs
+  if (fetchedKeyRef.current === currentKey) return; 
 
   const fetchDietPlan = async () => {
     try {

@@ -165,15 +165,15 @@ export default function Navbar() {
             </Dialog.Trigger>
 
             <Dialog.Portal>
-              <Dialog.Overlay className="bg-black/50 fixed inset-0 z-50 backdrop-blur-sm m-5" />
-              <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 focus:outline-none">
+              <Dialog.Overlay className="bg-black/50 fixed inset-0 z-50 backdrop-blur-sm " />
+              <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 focus:outline-none m-3">
                 <div className="flex justify-between items-center mb-6">
                   <Dialog.Title className="text-2xl font-bold text-white">
                     Account Verification
                   </Dialog.Title>
                   <Dialog.Close asChild>
                     <button
-                      className="text-gray-400 hover:text-white rounded-full p-1"
+                      className="text-gray-400 hover:text-white rounded-full p-1 cursor-pointer"
                       aria-label="Close"
                     >
                       <Cross2Icon className="h-5 w-5" />

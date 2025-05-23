@@ -29,17 +29,17 @@ export function estimateCalories({
 } {
   const MET_MAP = {
     treadmill: {
-      walking: 3.5,
-      jogging: 7,
-      running: 11,
+      walking: 3.0,    
+      jogging: 5.0,    
+      running: 8.0,    
     },
     uprightBike: {
-      light: 6,
-      moderate: 8,
-      vigorous: 12,
+      light: 5.0,      
+      moderate: 6.5,   
+      vigorous: 8.0,   
     },
-    crossTrainer: 8.5,
-    default: 6,
+    crossTrainer: 5.0,  
+    default: 4.0,      
   };
 
   let cardioCalories = 0;
@@ -49,7 +49,9 @@ export function estimateCalories({
 
     if (session.type === 'treadmill') {
       const treadmill = MET_MAP.treadmill;
-      if (session.speed < 6.5) {
+      if (session.speed < 5) {
+        met = treadmill.walking;
+      } else if (session.speed < 7) {
         met = treadmill.jogging;
       } else {
         met = treadmill.running;
@@ -72,11 +74,11 @@ export function estimateCalories({
   }
 
   let weightCalories = 0;
+  const avgCalPerRepPerKg = 0.04; 
 
   for (const category of Object.values(weight)) {
     for (const exercise of category) {
       const totalReps = exercise.sets * exercise.reps;
-      const avgCalPerRepPerKg = 0.08; 
       weightCalories += totalReps * avgCalPerRepPerKg * userWeightKg;
     }
   }
