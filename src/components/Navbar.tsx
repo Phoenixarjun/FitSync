@@ -71,7 +71,7 @@ export default function Navbar() {
       {/* Mobile Nav Toggle Button (left side) */}
       <button 
         onClick={() => setNavLinksOpen(!navLinksOpen)}
-        className="md:hidden absolute left-4 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer cursor-pointer"
+        className="md:hidden absolute left-4 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer"
       >
         <FiMenu className="w-6 h-6" />
       </button>
