@@ -1,6 +1,7 @@
 # 🏋️‍♂️ FitSync – Your AI-Powered Fitness Companion
 
-![FitSync Cover]([./images/Projects/Fitsync/CoverPage.png](https://github.com/user-attachments/assets/7e6107f1-9a25-4b28-8951-95838830f8ae))
+![FitSync Cover](https://github.com/user-attachments/assets/7b915076-d9cb-45ff-882e-879f9c353355)
+
 
 
 > **Reimagine fitness tracking.**  
@@ -91,7 +92,7 @@ Visual, responsive UI made with Tailwind and Radix for optimal experience across
 
 ## 🔗 Live Demo
 
-**🌍 [Visit FitSync Now →](https://fit-sync-sepia.vercel.app/)**  
+**🌍 [Visit FitSync Now →]([https://fit-sync-sepia.vercel.app/](https://fit-sync-flm918igy-naresh-b-as-projects.vercel.app/))**  
 Fully responsive. Works across devices.
 
 ---
