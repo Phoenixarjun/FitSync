@@ -13,7 +13,7 @@
 
 During my fitness journey, I faced challenges tracking my gym attendance, calorie burns, and sticking to personalized diet plans. This lack of structure led to fatigue and inconsistency.
 
-**FitSync** is my solution—leveraging **AI + Data + Design** to craft a **motivating, personalized fitness experience** that’s always within reach.
+**FitSync** is my solution leveraging **AI + Data + Design** to craft a **motivating, personalized fitness experience** that’s always within reach.
 
 ---
 
