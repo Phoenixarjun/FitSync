@@ -117,7 +117,8 @@ npm run dev
 
 ## 🧑‍💻 Author
 
-**Naresh B A** – Full Stack Developer & AI Innovator
+**Naresh B A** – Full Stack Developer & AI/ML Enthusiastic
+
 Connect: [LinkedIn](www.linkedin.com/in/naresh-b-a-1b5331243) | [Portfolio](https://your-portfolio.com](https://naresh-portfolio-007.netlify.app/)) 
 
 
