@@ -186,7 +186,7 @@ export default function Navbar() {
                     <span>
                       User not found.{" "}
                       <Link
-                        href="/register"
+                        href="/profile"
                         className="text-purple-400 hover:underline"
                       >
                         Register here
@@ -265,7 +265,7 @@ export default function Navbar() {
                 {shouldRegister && (
                   <div className="flex justify-center">
                     <Link
-                      href="/register"
+                      href="/profile"
                       className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
                     >
                       Go to Registration
