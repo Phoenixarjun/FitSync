@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Work from '@/models/Work';
+import Work, { AllWorkouts, CardioExercise, WeightExercise, UserStats } from '@/models/Work';
 import { Decimal128 } from 'mongodb';
 
 // Helper to properly format workout data including weight exercises
-function formatWorkoutResponse(workout: any) {
+function formatWorkoutResponse(workout: AllWorkouts | null) {
   if (!workout) return null;
 
   return {
     ...workout.toObject(),
     currentWeight: workout.currentWeight ? parseFloat(workout.currentWeight.toString()) : 0,
     cardio: workout.cardio || [],
-    weight: workout.weight || {}, // Keep the weight data as an object with categories
+    weight: workout.weight instanceof Map
+      ? Object.fromEntries(workout.weight.entries())
+      : (workout.weight || {}),
     calories: workout.calories || {
       total: 0,
       cardio: 0,
@@ -74,24 +76,22 @@ export async function POST(request: NextRequest) {
 
     // For existing workouts (updating)
     if (body._id) {
-      const updateData: any = {
+      const updateData = {
         $set: {
-          cardio: body.cardio,
-          weight: body.weight, // Keep the original structure
+          cardio: body.cardio as CardioExercise[],
+          weight: new Map(Object.entries(body.weight)) as Map<string, WeightExercise[]>,
           currentWeight: Decimal128.fromString(body.currentWeight?.toString() || '0'),
           calories: body.calories,
+          ...(isToday && {
+            stats: existingWorkout?.stats || {
+              currentStreak: 1,
+              bestStreak: 1,
+              consistencyScore: 1,
+              lastWorkoutDate: normalizedDate
+            } as UserStats
+          })
         }
       };
-
-      // Only update stats if it's today's workout
-      if (isToday) {
-        updateData.$set.stats = existingWorkout?.stats || {
-          currentStreak: 1,
-          bestStreak: 1,
-          consistencyScore: 1,
-          lastWorkoutDate: normalizedDate
-        };
-      }
 
       const updatedWorkout = await Work.findByIdAndUpdate(
         body._id,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
       // If updating today's workout, we might need to update streaks
       if (isToday) {
-        return await updateStreaks(updatedWorkout, body.userId);
+        return await updateStreaks(updatedWorkout as AllWorkouts, body.userId);
       }
 
       return NextResponse.json({
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
 
     // For new workouts (either today without existing, or past dates without existing)
-    let stats = {
+    const stats: UserStats = {
       currentStreak: 1,
       bestStreak: 1,
       consistencyScore: 1,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       .sort({ createdAt: -1 })
       .exec();
 
-    if (lastWorkout && lastWorkout.stats) {
+    if (lastWorkout?.stats) {
       const lastDate = new Date(lastWorkout.stats.lastWorkoutDate);
       lastDate.setHours(0, 0, 0, 0);
       
@@ -142,6 +142,7 @@ export async function POST(request: NextRequest) {
 
     const workout = new Work({
       ...body,
+      weight: new Map(Object.entries(body.weight)) as Map<string, WeightExercise[]>,
       currentWeight: Decimal128.fromString(body.currentWeight?.toString() || '0'),
       stats: stats,
       createdAt: normalizedDate
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updateStreaks(workout: any, userId: string) {
+async function updateStreaks(workout: AllWorkouts, userId: string) {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -177,7 +178,7 @@ async function updateStreaks(workout: any, userId: string) {
       createdAt: { $lt: today }
     }).sort({ createdAt: -1 }).exec();
 
-    let stats = workout.stats || {
+    const stats: UserStats = workout.stats || {
       currentStreak: 1,
       bestStreak: 1,
       consistencyScore: 1,

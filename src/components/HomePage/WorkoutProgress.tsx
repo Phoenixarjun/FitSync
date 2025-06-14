@@ -42,6 +42,7 @@ export default function WorkoutProgress() {
         if (!response.ok) throw new Error('Failed to fetch workout data');
         const data: WorkoutEntry[] = await response.json();
         setWorkoutData(data);
+        // console.log('Fetched workout data:', data);
       } catch (error) {
         console.error('Error fetching workout progress:', error);
       } finally {

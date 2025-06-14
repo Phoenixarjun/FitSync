@@ -180,7 +180,8 @@ const ToastNotification = ({
   const timerRef = useRef(0);
 
   useEffect(() => {
-    return () => clearTimeout(timerRef.current);
+    const timerRefValue = timerRef.current;
+    return () => clearTimeout(timerRefValue);
   }, []);
 
   const variantClasses = {
@@ -241,9 +242,9 @@ export default function WorkoutForm() {
   const [restTime, setRestTime] = useState<number>(1);
   const [currentWeight, setCurrentWeight] = useState<number>(0);
   const [date, setDate] = useState(() => {
-  const now = new Date();
-      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    });
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingWorkoutId, setExistingWorkoutId] = useState<string | null>(null);
   const [toastOpen, setToastOpen] = useState(false);
@@ -259,15 +260,15 @@ export default function WorkoutForm() {
   const { user } = useUser();
   const timerRef = useRef(0);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.body.removeAttribute('cz-shortcut-listen');
+    }
+  }, []);
 
   useEffect(() => {
-  if (typeof window !== 'undefined') {
-    document.body.removeAttribute('cz-shortcut-listen');
-  }
-}, []);
-
-  useEffect(() => {
-    return () => clearTimeout(timerRef.current);
+    const timerRefValue = timerRef.current;
+    return () => clearTimeout(timerRefValue);
   }, []);
 
   useEffect(() => {
@@ -277,7 +278,7 @@ export default function WorkoutForm() {
     }
   }, [time, speed]);
 
-useEffect(() => {
+  useEffect(() => {
     const checkExistingWorkout = async () => {
       if (!user?.userId || !date) return;
       
@@ -317,8 +318,9 @@ useEffect(() => {
           setWeightExercises([]);
           setCurrentWeight(0);
         }
-      } catch (error) {
-        showToast("Error", "Failed to load workout data", "error");
+      } catch (err) {
+        const error = err as Error;
+        showToast("Error", error.message || "Failed to load workout data", "error");
       }
     };
     
@@ -383,7 +385,7 @@ useEffect(() => {
     setWeightExercises(weightExercises.filter(ex => ex.id !== id));
   };
 
-const prepareWorkoutData = (): AllWorkouts => {
+  const prepareWorkoutData = (): AllWorkouts => {
     const weightByCategory: Record<string, WeightExercise[]> = {};
     
     weightExercises.forEach(exercise => {
@@ -470,8 +472,9 @@ const prepareWorkoutData = (): AllWorkouts => {
           router.push('/');
         }
       }, 2000);
-    } catch (error) {
-      showToast("Error", error instanceof Error ? error.message : "An error occurred while saving the workout.", "error");
+    } catch (err) {
+      const error = err as Error;
+      showToast("Error", error.message || "An error occurred while saving the workout.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -504,8 +507,6 @@ const prepareWorkoutData = (): AllWorkouts => {
     }
   );
   SelectItem.displayName = 'SelectItem';
-
-  const isToday = date === new Date().toISOString().split('T')[0];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4">
