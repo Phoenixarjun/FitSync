@@ -27,7 +27,7 @@ export default function LandingSection() {
       </p>
 
       <Link href="/workout" className="z-10">
-        <button className="z-20 mt-4 flex items-center cursor-pointer justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        <button className="z-20 mt-4 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
           Go to Workout Section
         </button>
       </Link>

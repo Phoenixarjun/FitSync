@@ -1,12 +1,14 @@
 "use client";
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon, Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
+import * as Toast from '@radix-ui/react-toast';
 import classNames from 'classnames';
 import { useRouter } from "next/navigation";
 import { useUser } from '@/context/UserContext';
 import { estimateCalories } from '@/lib/caloriesEstimator';
+import { v4 as uuidv4 } from 'uuid';
 
 type CardioExercise = {
   id: string;
@@ -23,6 +25,8 @@ type WeightExercise = {
   category: string;
   sets: number;
   reps: number;
+  weightUsed: number; 
+  restTime: number; 
   customName?: string;
   date: string;
 };
@@ -32,9 +36,13 @@ type AllWorkouts = {
   weight: Record<string, WeightExercise[]>;
   userId?: string;
   createdAt?: Date;
-  streak?: number; 
-  consistency?: number;
-  myBestStreak?: number;
+  stats?: {
+    currentStreak: number;
+    bestStreak: number;
+    consistencyScore: number;
+    lastWorkoutDate: Date;
+  };
+  currentWeight?: number; 
   calories?: {
     total: number;
     cardio: number;
@@ -57,7 +65,6 @@ const exerciseCategories = {
   abs: "Abs",
   back: "Back",
   shoulders: "Shoulders",
-  cardio: "Cardio",
   other: "Other"
 };
 
@@ -134,18 +141,6 @@ const exercisesData = {
     { name: "Cable lateral raise", category: "shoulders" },
     { name: "Smith machine shoulder press", category: "shoulders" }
   ],
-  cardio: [
-    { name: "Treadmill", category: "cardio" },
-    { name: "Upright bike", category: "cardio" },
-    { name: "Cross trainers", category: "cardio" },
-    { name: "HIIT workout", category: "cardio" },
-    { name: "Rowing machine", category: "cardio" },
-    { name: "Elliptical trainer", category: "cardio" },
-    { name: "Stair climber", category: "cardio" },
-    { name: "Exercise bike", category: "cardio" },
-    { name: "Stationary bike", category: "cardio" },
-    { name: "Jump rope", category: "cardio" }
-  ],
   other: [
     { name: "Pilates", category: "other" },
     { name: "Tricep dips", category: "other" },
@@ -169,6 +164,70 @@ const exercisesData = {
   ]
 };
 
+const ToastNotification = ({
+  open,
+  setOpen,
+  title,
+  description,
+  variant = "default",
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  title: string;
+  description: string;
+  variant?: "success" | "error" | "default";
+}) => {
+  const timerRef = useRef(0);
+
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
+
+  const variantClasses = {
+    success: "bg-green-500 text-white",
+    error: "bg-red-500 text-white",
+    default: "bg-white text-slate12",
+  };
+
+  return (
+    <Toast.Provider swipeDirection="right">
+      <Toast.Root
+        className={classNames(
+          "grid grid-cols-[auto_max-content] items-center gap-x-[15px] rounded-md p-[15px]",
+          "shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]",
+          "[grid-template-areas:_'title_action'_'description_action']",
+          "data-[swipe=cancel]:translate-x-0",
+          "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
+          "data-[state=closed]:animate-hide",
+          "data-[state=open]:animate-slideIn",
+          "data-[swipe=end]:animate-swipeOut",
+          "data-[swipe=cancel]:transition-[transform_200ms_ease-out]",
+          variantClasses[variant]
+        )}
+        open={open}
+        onOpenChange={setOpen}
+      >
+        <Toast.Title className="mb-[5px] text-[15px] font-medium text-slate12 [grid-area:_title]">
+          {title}
+        </Toast.Title>
+        <Toast.Description className="m-0 text-[13px] leading-[1.3] text-slate11 [grid-area:_description]">
+          {description}
+        </Toast.Description>
+        <Toast.Action
+          className="[grid-area:_action]"
+          asChild
+          altText="Close toast"
+        >
+          <button className="inline-flex h-[25px] items-center justify-center rounded bg-green2 px-2.5 text-xs font-medium leading-[25px] text-green11 shadow-[inset_0_0_0_1px] shadow-green7 hover:shadow-[inset_0_0_0_1px] hover:shadow-green8 focus:shadow-[0_0_0_2px] focus:shadow-green8">
+            Close
+          </button>
+        </Toast.Action>
+      </Toast.Root>
+      <Toast.Viewport className="fixed bottom-0 right-0 z-[2147483647] m-0 flex w-[390px] max-w-[100vw] list-none flex-col gap-2.5 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]" />
+    </Toast.Provider>
+  );
+};
+
 export default function WorkoutForm() {
   const [tab, setTab] = useState<'cardio' | 'weight'>('cardio');
   const [cardioExercises, setCardioExercises] = useState<CardioExercise[]>([]);
@@ -178,10 +237,19 @@ export default function WorkoutForm() {
   const [customExercise, setCustomExercise] = useState('');
   const [sets, setSets] = useState(3);
   const [reps, setReps] = useState(10);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [message, setMessage] = useState('');
+  const [weightUsed, setWeightUsed] = useState<number>(0);
+  const [restTime, setRestTime] = useState<number>(1);
+  const [currentWeight, setCurrentWeight] = useState<number>(0);
+  const [date, setDate] = useState(() => {
+  const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [existingWorkoutId, setExistingWorkoutId] = useState<string | null>(null);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastTitle, setToastTitle] = useState("");
+  const [toastDescription, setToastDescription] = useState("");
+  const [toastVariant, setToastVariant] = useState<"success" | "error" | "default">("default");
   const [cardioType, setCardioType] = useState<'treadmill' | 'uprightBike' | 'crossTrainer'>('treadmill');
   const [time, setTime] = useState<number>(30);
   const [speed, setSpeed] = useState<number>(8);
@@ -189,6 +257,18 @@ export default function WorkoutForm() {
 
   const router = useRouter();
   const { user } = useUser();
+  const timerRef = useRef(0);
+
+
+  useEffect(() => {
+  if (typeof window !== 'undefined') {
+    document.body.removeAttribute('cz-shortcut-listen');
+  }
+}, []);
+
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
   useEffect(() => {
     if (time && speed) {
@@ -197,9 +277,68 @@ export default function WorkoutForm() {
     }
   }, [time, speed]);
 
+useEffect(() => {
+    const checkExistingWorkout = async () => {
+      if (!user?.userId || !date) return;
+      
+      try {
+        const response = await fetch(`/api/saveworkout?userId=${user.userId}&date=${date}`);
+        const data = await response.json();
+
+        console.log("Existing workout data:", data);
+        
+        if (data.workout) {
+          setExistingWorkoutId(data.workout._id);
+          
+          setCardioExercises([]);
+          setWeightExercises([]);
+          
+          if (data.workout.cardio) {
+            const cardioWithIds = data.workout.cardio.map((ex: CardioExercise) => ({
+              ...ex,
+              id: ex.id || `cardio-${uuidv4()}`
+            }));
+            setCardioExercises(cardioWithIds);
+          }
+          
+          if (data.workout.weight) {
+            const weightExercisesArray = Object.values(data.workout.weight).flat() as WeightExercise[];
+            const weightWithIds = weightExercisesArray.map(ex => ({
+              ...ex,
+              id: ex.id || `weight-${uuidv4()}`
+            }));
+            setWeightExercises(weightWithIds);
+          }
+          
+          setCurrentWeight(data.workout.currentWeight || 0);
+        } else {
+          setExistingWorkoutId(null);
+          setCardioExercises([]);
+          setWeightExercises([]);
+          setCurrentWeight(0);
+        }
+      } catch (error) {
+        showToast("Error", "Failed to load workout data", "error");
+      }
+    };
+    
+    checkExistingWorkout();
+  }, [date, user?.userId]);
+
+  const showToast = (title: string, description: string, variant: "success" | "error" | "default") => {
+    setToastOpen(false);
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => {
+      setToastTitle(title);
+      setToastDescription(description);
+      setToastVariant(variant);
+      setToastOpen(true);
+    }, 100);
+  };
+
   const addCardioExercise = () => {
     const newExercise: CardioExercise = {
-      id: String(Date.now()),
+      id: `cardio-${uuidv4()}`,
       type: cardioType,
       time,
       speed,
@@ -209,23 +348,24 @@ export default function WorkoutForm() {
     setCardioExercises([...cardioExercises, newExercise]);
   };
 
-  const removeCardioExercise = (id: string) => {
-    setCardioExercises(cardioExercises.filter(ex => ex.id !== id));
-  };
-
   const addWeightExercise = () => {
-    if (!selectedExercise && !customExercise) return;
+    if (!selectedExercise && !customExercise) {
+      showToast("Error", "Please select or enter an exercise name", "error");
+      return;
+    }
     
     const category = selectedCategory === 'all' 
       ? Object.values(exercisesData).flat().find(ex => ex.name === selectedExercise)?.category || 'other'
       : selectedCategory;
     
     const newExercise: WeightExercise = {
-      id: Date.now().toString(),
+      id: `weight-${uuidv4()}`,
       name: selectedExercise === 'other' ? customExercise : selectedExercise || customExercise,
       category,
       sets,
       reps,
+      weightUsed, 
+      restTime, 
       date,
       ...(selectedExercise === 'other' && { customName: customExercise })
     };
@@ -235,11 +375,15 @@ export default function WorkoutForm() {
     setCustomExercise('');
   };
 
+  const removeCardioExercise = (id: string) => {
+    setCardioExercises(cardioExercises.filter(ex => ex.id !== id));
+  };
+
   const removeWeightExercise = (id: string) => {
     setWeightExercises(weightExercises.filter(ex => ex.id !== id));
   };
 
-  const prepareWorkoutData = (): AllWorkouts => {
+const prepareWorkoutData = (): AllWorkouts => {
     const weightByCategory: Record<string, WeightExercise[]> = {};
     
     weightExercises.forEach(exercise => {
@@ -249,7 +393,6 @@ export default function WorkoutForm() {
       weightByCategory[exercise.category].push(exercise);
     });
   
-    // Calculate calories
     const { totalCalories, cardioCalories, weightCalories } = estimateCalories({
       cardio: cardioExercises.map(ex => ({
         type: ex.type,
@@ -260,17 +403,25 @@ export default function WorkoutForm() {
       weight: weightByCategory,
       userWeightKg: user?.weight || 70,
     });
+
+    const workoutDate = new Date(date);
+    const utcDate = new Date(Date.UTC(
+      workoutDate.getFullYear(),
+      workoutDate.getMonth(),
+      workoutDate.getDate()
+    ));
     
     return {
       cardio: [...cardioExercises],
       weight: weightByCategory,
       userId: user?.userId,
+      currentWeight: currentWeight, 
       calories: {
         total: totalCalories,
         cardio: cardioCalories,
         weight: weightCalories,
       },
-      createdAt: new Date(),
+      createdAt: utcDate,
     };
   };
 
@@ -279,41 +430,48 @@ export default function WorkoutForm() {
     setIsSubmitting(true);
     
     if (cardioExercises.length === 0 && weightExercises.length === 0) {
-      setMessage("Please add at least one exercise before saving");
+      showToast("Error", "Please add at least one exercise before saving", "error");
       setIsSubmitting(false);
       return;
     }
     
     try {
+      const workoutData = prepareWorkoutData();
+      
       const response = await fetch('/api/saveworkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...prepareWorkoutData(),
+          ...workoutData,
           userId: user?.userId,
+          _id: existingWorkoutId || undefined,
         }),
       });
   
       const data = await response.json();
-      console.log("Workout saved:", data);
   
       if (!response.ok) {
         throw new Error(data.message || 'Failed to save workout');
       }
-  
-      setMessage("Workout saved successfully!");
+
+      showToast("Success", data.message || "Workout saved successfully!", "success");
       
-      setCardioExercises([]);
-      setWeightExercises([]);
+      const isToday = date === new Date().toISOString().split('T')[0];
+      if (isToday) {
+        setCardioExercises([]);
+        setWeightExercises([]);
+        setCurrentWeight(0);
+      }
   
       setTimeout(() => {
-        router.push('/');
-      }, 3000);
+        if (isToday) {
+          router.push('/');
+        }
+      }, 2000);
     } catch (error) {
-      console.error("Error saving workout:", error);
-      setMessage(error instanceof Error ? error.message : "An error occurred while saving the workout.");
+      showToast("Error", error instanceof Error ? error.message : "An error occurred while saving the workout.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -347,16 +505,46 @@ export default function WorkoutForm() {
   );
   SelectItem.displayName = 'SelectItem';
 
+  const isToday = date === new Date().toISOString().split('T')[0];
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4 ">
+    <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4">
       <div className="w-full max-w-3xl rounded-xl shadow-lg p-6 bg-white/10 backdrop-blur-md border border-white/20">
         <h1 className="text-3xl font-bold mb-6 text-center text-white">Workout Tracker</h1>
         
-        <Tabs.Root 
-          className="flex flex-col"
-          value={tab} 
-          onValueChange={(value) => setTab(value as 'cardio' | 'weight')}
-        >
+        {/* Date Picker */}
+        <div className="mb-4">
+          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="date">
+            Workout Date
+          </label>
+          <input
+            type="date"
+            id="date"
+            value={date}
+            max={new Date().toISOString().split('T')[0]}
+            onChange={(e) => setDate(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+        </div>
+
+        {/* Current Weight */}
+        <div className="mb-6">
+          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="currentWeight">
+            Current Weight (kg)
+          </label>
+          <input
+            type="number"
+            id="currentWeight"
+            value={currentWeight}
+            onChange={(e) => setCurrentWeight(Number(e.target.value))}
+            min="0"
+            step="0.1"
+            className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+        </div>
+
+        {/* Tabs */}
+        <Tabs.Root className="flex flex-col" value={tab} onValueChange={(value) => setTab(value as 'cardio' | 'weight')}>
           <Tabs.List className="flex mb-8 bg-gray-700 rounded-lg p-1">
             <Tabs.Trigger
               value="cardio"
@@ -380,19 +568,7 @@ export default function WorkoutForm() {
             </Tabs.Trigger>
           </Tabs.List>
 
-          <div className="mb-6">
-            <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="date">
-              Workout Date
-            </label>
-            <input
-              type="date"
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
-
+          {/* Cardio Tab Content */}
           <Tabs.Content value="cardio" className="outline-none">
             <div className="mb-6">
               <label className="block text-gray-300 text-sm font-bold mb-2">
@@ -477,7 +653,7 @@ export default function WorkoutForm() {
                 <h3 className="text-lg font-semibold mb-3 text-white">Added Cardio Sessions</h3>
                 <div className="space-y-3">
                   {cardioExercises.map((exercise) => (
-                    <div key={exercise.id} className="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
+                    <div key={`cardio-${exercise.id}`} className="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
                       <div>
                         <p className="font-medium text-white">
                           {exercise.type === 'treadmill' ? 'Treadmill' : 
@@ -501,6 +677,7 @@ export default function WorkoutForm() {
             )}
           </Tabs.Content>
 
+          {/* Weight Training Tab Content */}
           <Tabs.Content value="weight" className="outline-none">
             <div className="mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -527,7 +704,7 @@ export default function WorkoutForm() {
                         <Select.Viewport className="p-1">
                           {Object.entries(exerciseCategories).map(([value, name]) => (
                             <SelectItem 
-                              key={value} 
+                              key={`category-${value}`}
                               value={value}
                               className="text-sm"
                             >
@@ -574,7 +751,7 @@ export default function WorkoutForm() {
                         <Select.Viewport className="p-1">
                           {filteredExercises.map((exercise) => (
                             <SelectItem 
-                              key={`${exercise.name}-${exercise.category}`}
+                              key={`exercise-${exercise.name}-${exercise.category}`}
                               value={exercise.name}
                               className="text-sm"
                             >
@@ -610,7 +787,7 @@ export default function WorkoutForm() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="sets">
                     Sets
@@ -639,6 +816,37 @@ export default function WorkoutForm() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="weightUsed">
+                    Weight Used (kg)
+                  </label>
+                  <input
+                    type="number"
+                    id="weightUsed"
+                    value={weightUsed}
+                    onChange={(e) => setWeightUsed(Number(e.target.value))}
+                    min="0"
+                    step="0.5"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="restTime">
+                    Rest Between Sets (mins)
+                  </label>
+                  <input
+                    type="number"
+                    id="restTime"
+                    value={restTime}
+                    onChange={(e) => setRestTime(Number(e.target.value))}
+                    min="0.5"
+                    step="0.5"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={addWeightExercise}
@@ -654,12 +862,15 @@ export default function WorkoutForm() {
                 <h3 className="text-lg font-semibold mb-3 text-white">Added Exercises</h3>
                 <div className="space-y-3">
                   {weightExercises.map((exercise) => (
-                    <div key={exercise.id} className="bg-gray-700 p-3 rounded-lg">
+                    <div key={`weight-${exercise.id}`} className="bg-gray-700 p-3 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-white">{exercise.name}</p>
                           <p className="text-sm text-gray-300">
                             {exercise.sets} sets × {exercise.reps} reps
+                          </p>
+                          <p className="text-sm text-gray-300">
+                            Weight: {exercise.weightUsed} kg | Rest: {exercise.restTime} mins
                           </p>
                         </div>
                         <button
@@ -683,21 +894,25 @@ export default function WorkoutForm() {
           </Tabs.Content>
         </Tabs.Root>
 
-        {message && (
-          <div className={`mb-4 p-3 rounded-md ${message.includes("success") ? "bg-green-800/30 text-green-200" : "bg-red-800/30 text-red-200"}`}>
-            {message}
-          </div>
-        )}
-
+        {/* Submit Button */}
         <button
           type="button"
           onClick={handleSubmit}
           disabled={(cardioExercises.length === 0 && weightExercises.length === 0) || isSubmitting}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Saving..." : "Save Complete Workout"}
+          {isSubmitting ? "Saving..." : existingWorkoutId ? "Update Workout" : "Save Workout"}
         </button>
       </div>
+
+      {/* Toast Notification */}
+      <ToastNotification
+        open={toastOpen}
+        setOpen={setToastOpen}
+        title={toastTitle}
+        description={toastDescription}
+        variant={toastVariant}
+      />
     </div>
   );
 }

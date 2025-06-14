@@ -13,6 +13,8 @@ export interface WeightExercise {
   category: string;
   sets: number;
   reps: number;
+  weightUsed: number; 
+  restTime: number;    
   customName?: string;
   date: string;
 }
@@ -28,6 +30,7 @@ export interface AllWorkouts extends Document {
   cardio: CardioExercise[];
   weight: Record<string, WeightExercise[]>;
   userId: string;
+  currentWeight?: number; 
   stats: UserStats;
   calories: {
     total: number;
@@ -50,6 +53,8 @@ const WeightExerciseSchema = new Schema<WeightExercise>({
   category: { type: String, required: true },
   sets: { type: Number, required: true },
   reps: { type: Number, required: true },
+  weightUsed: { type: Number, required: true },  
+  restTime: { type: Number, required: true },    
   customName: { type: String },
   date: { type: String, required: true },
 });
@@ -65,6 +70,7 @@ const WorkoutSchema = new Schema<AllWorkouts>({
   cardio: [CardioExerciseSchema],
   weight: { type: Map, of: [WeightExerciseSchema], required: true },
   userId: { type: String, required: true },
+  currentWeight: { type: Schema.Types.Decimal128 }, 
   stats: UserStatsSchema,
   calories: {
     total: { type: Number, required: true },

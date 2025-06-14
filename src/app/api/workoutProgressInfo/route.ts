@@ -29,17 +29,23 @@ export async function GET(request: NextRequest) {
       const weightCalories = workout.calories?.weight || 0;
       const totalCalories = workout.calories?.total || (cardioCalories + weightCalories);
 
+      // Convert Decimal128 currentWeight to float
+      const currentWeight =
+        workout.currentWeight !== undefined
+          ? parseFloat(workout.currentWeight.toString())
+          : undefined;
+
       return {
         date,
         totalCalories,
         cardioCalories,
         weightCalories,
         consistencyScore: workout.stats?.consistencyScore || 0,
-        // Add any other fields you want to display
         streak: workout.stats?.currentStreak || 0,
+        currentWeight,
         workoutTypes: [
           ...(workout.cardio?.map((c: { type: string }) => c.type) || []),
-          ...Object.values(workout.weight || {}).flatMap(exercises => 
+          ...Object.values(workout.weight || {}).flatMap(exercises =>
             Array.isArray(exercises) ? exercises.map(ex => ex.category) : []
           )
         ].filter(Boolean)

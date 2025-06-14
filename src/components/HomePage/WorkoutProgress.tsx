@@ -23,6 +23,7 @@ interface WorkoutEntry {
   weightCalories: number;
   consistencyScore: number;
   workoutTypes?: string[];
+  currentWeight?: number;
 }
 
 export default function WorkoutProgress() {
@@ -68,12 +69,14 @@ export default function WorkoutProgress() {
     );
   }
 
+  const weightData = workoutData.filter(entry => typeof entry.currentWeight === 'number' && entry.currentWeight > 0);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-white">
       <h1 className="text-3xl font-bold text-center mb-8">Your Workout Progress🔥</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Line Chart */}
+        {/* Total Calories */}
         <ChartCard title="Total Calories Burned Over Time">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={workoutData}>
@@ -94,7 +97,7 @@ export default function WorkoutProgress() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Bar Chart */}
+        {/* Cardio vs Weight */}
         <ChartCard title="Cardio vs Weight Training">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={workoutData}>
@@ -109,7 +112,7 @@ export default function WorkoutProgress() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Area Chart */}
+        {/* Consistency Score */}
         <ChartCard title="Workout Consistency">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={workoutData}>
@@ -147,6 +150,33 @@ export default function WorkoutProgress() {
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
+
+        {/* Weight Progress - Centered and Wider */}
+        <div className="lg:col-span-2 flex justify-center">
+          <div className="w-full max-w-3xl">
+            <ChartCard title="Weight Progress">
+              {weightData.length > 0 && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={weightData}>
+                    <CartesianGrid stroke="#444" />
+                    <XAxis dataKey="date" stroke="#ccc" />
+                    <YAxis stroke="#ccc" domain={['auto', 'auto']} />
+                    <Tooltip contentStyle={{ backgroundColor: '#1f1f1f', border: 'none', color: '#fff' }} />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="currentWeight"
+                      stroke="#f472b6"
+                      strokeWidth={2}
+                      activeDot={{ r: 6 }}
+                      name="Weight (kg)"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </ChartCard>
+          </div>
+        </div>
       </div>
     </div>
   );
