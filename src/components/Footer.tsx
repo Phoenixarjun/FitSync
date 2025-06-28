@@ -8,9 +8,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center md:items-start">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold">
-                NB
-              </div>
+                <Image
+                  src="/LogoWhite.png" 
+                  alt="Naresh B A"
+                  className="rounded-full"
+                  width={50}
+                  height={50}
+                />
               <span className="text-2xl font-bold dark:text-white">Naresh B A</span>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm text-center md:text-left">

@@ -10,7 +10,7 @@ import { FiSidebar } from 'react-icons/fi'
 
 export default function HomeLayout() {
   const [isVerified, setIsVerified] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const checkVerification = () => {
     const storedUser = localStorage.getItem('user');
