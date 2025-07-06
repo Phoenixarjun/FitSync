@@ -134,14 +134,14 @@ function calculateWeightTrainingCalories(
 ): number {
   const BASE_ENERGY_PER_REP = 0.05;
   const REST_MET = 1.5;
-  const WORK_MET = 3.5; // Slightly higher for bodyweight support
-  const BODYWEIGHT_MET = 4.0; // For exercises with weightUsed = 0
+  const WORK_MET = 3.5;
+  const BODYWEIGHT_MET = 4.0;
 
   return Object.values(weight).reduce((categoryTotal, category) => {
     return categoryTotal + category.reduce((exerciseTotal, exercise) => {
       const isBodyweight = exercise.weightUsed === 0;
 
-      const effectiveWeight = isBodyweight ? userWeightKg : exercise.weightUsed;
+      const effectiveWeight = isBodyweight ? userWeightKg * 0.3 : exercise.weightUsed;
 
       const workCalories =
         exercise.sets * exercise.reps *
