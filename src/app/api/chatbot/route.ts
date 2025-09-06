@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 // Configuration constants
 const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX || "fitsync";
 const PINECONE_TEXT_KEY = "text";
-const GEMINI_MODEL_NAME = "gemini-1.5-pro";
+const GEMINI_MODEL_NAME = "gemini-2.5-flash";
 const EMBEDDING_MODEL = "text-embedding-004";
 
 async function initializeChatbot() {
